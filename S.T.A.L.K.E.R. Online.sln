@@ -1,0 +1,38 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "soCore", "soCore\soCore.vcxproj", "{3CF7C661-E85F-4AA1-A119-179E8911FE2E}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "soLauncher", "soLauncher\soLauncher.vcxproj", "{A1331523-F8AB-497B-A6BE-E702471D4FEA}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "soNetwork", "soNetwork\soNetwork.vcxproj", "{0D7FC3F6-F673-48A4-987A-DB51FCFC5846}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "steam-launcher", "steam-launcher\steam-launcher.vcxproj", "{9CB9E632-1DA1-42B0-99AB-3B685963ACC1}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3CF7C661-E85F-4AA1-A119-179E8911FE2E}.Debug|Win32.ActiveCfg = Debug|Win32
+		{3CF7C661-E85F-4AA1-A119-179E8911FE2E}.Debug|Win32.Build.0 = Debug|Win32
+		{3CF7C661-E85F-4AA1-A119-179E8911FE2E}.Release|Win32.ActiveCfg = Release|Win32
+		{3CF7C661-E85F-4AA1-A119-179E8911FE2E}.Release|Win32.Build.0 = Release|Win32
+		{A1331523-F8AB-497B-A6BE-E702471D4FEA}.Debug|Win32.ActiveCfg = Debug|Win32
+		{A1331523-F8AB-497B-A6BE-E702471D4FEA}.Debug|Win32.Build.0 = Debug|Win32
+		{A1331523-F8AB-497B-A6BE-E702471D4FEA}.Release|Win32.ActiveCfg = Release|Win32
+		{A1331523-F8AB-497B-A6BE-E702471D4FEA}.Release|Win32.Build.0 = Release|Win32
+		{0D7FC3F6-F673-48A4-987A-DB51FCFC5846}.Debug|Win32.ActiveCfg = Debug|Win32
+		{0D7FC3F6-F673-48A4-987A-DB51FCFC5846}.Debug|Win32.Build.0 = Debug|Win32
+		{0D7FC3F6-F673-48A4-987A-DB51FCFC5846}.Release|Win32.ActiveCfg = Release|Win32
+		{0D7FC3F6-F673-48A4-987A-DB51FCFC5846}.Release|Win32.Build.0 = Release|Win32
+		{9CB9E632-1DA1-42B0-99AB-3B685963ACC1}.Debug|Win32.ActiveCfg = Debug|Win32
+		{9CB9E632-1DA1-42B0-99AB-3B685963ACC1}.Debug|Win32.Build.0 = Debug|Win32
+		{9CB9E632-1DA1-42B0-99AB-3B685963ACC1}.Release|Win32.ActiveCfg = Release|Win32
+		{9CB9E632-1DA1-42B0-99AB-3B685963ACC1}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

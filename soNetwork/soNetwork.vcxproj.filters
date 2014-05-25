@@ -1,0 +1,377 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Файлы исходного кода">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Заголовочные файлы">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Файлы ресурсов">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="X-Ray">
+      <UniqueIdentifier>{111be699-afad-461a-95fc-ad60542708d9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Заголовочные файлы\Creatures">
+      <UniqueIdentifier>{a268e500-9a78-4017-b2cb-aa7c040d5c09}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Файлы исходного кода\Creatures">
+      <UniqueIdentifier>{37e1642d-a256-4747-a4aa-1ecb77d8ba9a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Файлы исходного кода\shared">
+      <UniqueIdentifier>{f05c247b-5ff6-424e-8677-c199828c66f3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Заголовочные файлы\shared">
+      <UniqueIdentifier>{7df4544e-f8e4-490a-b9b1-ac21fde1ba8d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Файлы исходного кода\Creatures\Client">
+      <UniqueIdentifier>{ab08f4be-e052-443b-b74e-e246c54dfdc0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Файлы исходного кода\Creatures\Server">
+      <UniqueIdentifier>{47099f47-5e09-4ea9-9436-7d9c735b1b49}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Заголовочные файлы\Creatures\Client">
+      <UniqueIdentifier>{7e4dc038-553d-4fac-9622-b1644a0c354a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Заголовочные файлы\Creatures\Server">
+      <UniqueIdentifier>{7ecbc006-6edc-4dc1-8908-0a68d7cf8dbf}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\shared\log.h">
+      <Filter>Заголовочные файлы\shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\shared\hook.h">
+      <Filter>Заголовочные файлы\shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\X-Ray\CApplication.h">
+      <Filter>X-Ray</Filter>
+    </ClInclude>
+    <ClInclude Include="..\X-Ray\CConsole.h">
+      <Filter>X-Ray</Filter>
+    </ClInclude>
+    <ClInclude Include="..\X-Ray\CEvent.h">
+      <Filter>X-Ray</Filter>
+    </ClInclude>
+    <ClInclude Include="..\X-Ray\CGameFont.h">
+      <Filter>X-Ray</Filter>
+    </ClInclude>
+    <ClInclude Include="..\X-Ray\CObject.h">
+      <Filter>X-Ray</Filter>
+    </ClInclude>
+    <ClInclude Include="..\X-Ray\CObjectList.h">
+      <Filter>X-Ray</Filter>
+    </ClInclude>
+    <ClInclude Include="..\X-Ray\CObjectSpace.h">
+      <Filter>X-Ray</Filter>
+    </ClInclude>
+    <ClInclude Include="..\X-Ray\CSE_Abstract.h">
+      <Filter>X-Ray</Filter>
+    </ClInclude>
+    <ClInclude Include="..\X-Ray\DLL_Pure.h">
+      <Filter>X-Ray</Filter>
+    </ClInclude>
+    <ClInclude Include="..\X-Ray\ICollidable.h">
+      <Filter>X-Ray</Filter>
+    </ClInclude>
+    <ClInclude Include="..\X-Ray\ICollisionForm.h">
+      <Filter>X-Ray</Filter>
+    </ClInclude>
+    <ClInclude Include="..\X-Ray\IEventReceiver.h">
+      <Filter>X-Ray</Filter>
+    </ClInclude>
+    <ClInclude Include="..\X-Ray\IGame_Level.h">
+      <Filter>X-Ray</Filter>
+    </ClInclude>
+    <ClInclude Include="..\X-Ray\IRender_ObjectSpecific.h">
+      <Filter>X-Ray</Filter>
+    </ClInclude>
+    <ClInclude Include="..\X-Ray\IRender_Sector.h">
+      <Filter>X-Ray</Filter>
+    </ClInclude>
+    <ClInclude Include="..\X-Ray\IRenderable.h">
+      <Filter>X-Ray</Filter>
+    </ClInclude>
+    <ClInclude Include="..\X-Ray\IRenderVisual.h">
+      <Filter>X-Ray</Filter>
+    </ClInclude>
+    <ClInclude Include="..\X-Ray\ISheduled.h">
+      <Filter>X-Ray</Filter>
+    </ClInclude>
+    <ClInclude Include="..\X-Ray\ISpatial.h">
+      <Filter>X-Ray</Filter>
+    </ClInclude>
+    <ClInclude Include="..\X-Ray\NET_Packet.h">
+      <Filter>X-Ray</Filter>
+    </ClInclude>
+    <ClInclude Include="..\X-Ray\pureFrame.h">
+      <Filter>X-Ray</Filter>
+    </ClInclude>
+    <ClInclude Include="..\X-Ray\str_container.h">
+      <Filter>X-Ray</Filter>
+    </ClInclude>
+    <ClInclude Include="..\X-Ray\utils.h">
+      <Filter>X-Ray</Filter>
+    </ClInclude>
+    <ClInclude Include="..\X-Ray\xrFactory.h">
+      <Filter>X-Ray</Filter>
+    </ClInclude>
+    <ClInclude Include="..\X-Ray\xrMemory.h">
+      <Filter>X-Ray</Filter>
+    </ClInclude>
+    <ClInclude Include="..\X-Ray\CLocatorAPI.h">
+      <Filter>X-Ray</Filter>
+    </ClInclude>
+    <ClInclude Include="..\X-Ray\IReader.h">
+      <Filter>X-Ray</Filter>
+    </ClInclude>
+    <ClInclude Include="..\X-Ray\IPureClient.h">
+      <Filter>X-Ray</Filter>
+    </ClInclude>
+    <ClInclude Include="Creatures\Client\CAI_Bloodsucker.h">
+      <Filter>Заголовочные файлы\Creatures\Client</Filter>
+    </ClInclude>
+    <ClInclude Include="Creatures\Client\CAI_Boar.h">
+      <Filter>Заголовочные файлы\Creatures\Client</Filter>
+    </ClInclude>
+    <ClInclude Include="Creatures\Client\CAI_Crow.h">
+      <Filter>Заголовочные файлы\Creatures\Client</Filter>
+    </ClInclude>
+    <ClInclude Include="Creatures\Client\CAI_Dog.h">
+      <Filter>Заголовочные файлы\Creatures\Client</Filter>
+    </ClInclude>
+    <ClInclude Include="Creatures\Client\CAI_Flesh.h">
+      <Filter>Заголовочные файлы\Creatures\Client</Filter>
+    </ClInclude>
+    <ClInclude Include="Creatures\Client\CAI_PseudoDog.h">
+      <Filter>Заголовочные файлы\Creatures\Client</Filter>
+    </ClInclude>
+    <ClInclude Include="Creatures\Client\CAI_Rat.h">
+      <Filter>Заголовочные файлы\Creatures\Client</Filter>
+    </ClInclude>
+    <ClInclude Include="Creatures\Client\CAI_Stalker.h">
+      <Filter>Заголовочные файлы\Creatures\Client</Filter>
+    </ClInclude>
+    <ClInclude Include="Creatures\Client\CAI_Trader.h">
+      <Filter>Заголовочные файлы\Creatures\Client</Filter>
+    </ClInclude>
+    <ClInclude Include="Creatures\Client\CBaseMonster.h">
+      <Filter>Заголовочные файлы\Creatures\Client</Filter>
+    </ClInclude>
+    <ClInclude Include="Creatures\Client\CBurer.h">
+      <Filter>Заголовочные файлы\Creatures\Client</Filter>
+    </ClInclude>
+    <ClInclude Include="Creatures\Client\CCat.h">
+      <Filter>Заголовочные файлы\Creatures\Client</Filter>
+    </ClInclude>
+    <ClInclude Include="Creatures\Client\CChimera.h">
+      <Filter>Заголовочные файлы\Creatures\Client</Filter>
+    </ClInclude>
+    <ClInclude Include="Creatures\Client\CController.h">
+      <Filter>Заголовочные файлы\Creatures\Client</Filter>
+    </ClInclude>
+    <ClInclude Include="Creatures\Client\CFracture.h">
+      <Filter>Заголовочные файлы\Creatures\Client</Filter>
+    </ClInclude>
+    <ClInclude Include="Creatures\Client\CPhantom.h">
+      <Filter>Заголовочные файлы\Creatures\Client</Filter>
+    </ClInclude>
+    <ClInclude Include="Creatures\Client\CPoltergeist.h">
+      <Filter>Заголовочные файлы\Creatures\Client</Filter>
+    </ClInclude>
+    <ClInclude Include="Creatures\Client\CPseudoGigant.h">
+      <Filter>Заголовочные файлы\Creatures\Client</Filter>
+    </ClInclude>
+    <ClInclude Include="Creatures\Client\CPsyDog.h">
+      <Filter>Заголовочные файлы\Creatures\Client</Filter>
+    </ClInclude>
+    <ClInclude Include="Creatures\Client\CPsyDogPhantom.h">
+      <Filter>Заголовочные файлы\Creatures\Client</Filter>
+    </ClInclude>
+    <ClInclude Include="Creatures\Client\CSnork.h">
+      <Filter>Заголовочные файлы\Creatures\Client</Filter>
+    </ClInclude>
+    <ClInclude Include="Creatures\Client\CTushkano.h">
+      <Filter>Заголовочные файлы\Creatures\Client</Filter>
+    </ClInclude>
+    <ClInclude Include="Creatures\Client\CZombie.h">
+      <Filter>Заголовочные файлы\Creatures\Client</Filter>
+    </ClInclude>
+    <ClInclude Include="Creatures\Server\CSE_ALifeCreatureCrow.h">
+      <Filter>Заголовочные файлы\Creatures\Server</Filter>
+    </ClInclude>
+    <ClInclude Include="Creatures\Server\CSE_ALifeCreaturePhantom.h">
+      <Filter>Заголовочные файлы\Creatures\Server</Filter>
+    </ClInclude>
+    <ClInclude Include="Creatures\Server\CSE_ALifeCreatureRat.h">
+      <Filter>Заголовочные файлы\Creatures\Server</Filter>
+    </ClInclude>
+    <ClInclude Include="Creatures\Server\CSE_ALifeHumanStalker.h">
+      <Filter>Заголовочные файлы\Creatures\Server</Filter>
+    </ClInclude>
+    <ClInclude Include="Creatures\Server\CSE_ALifeMonsterBase.h">
+      <Filter>Заголовочные файлы\Creatures\Server</Filter>
+    </ClInclude>
+    <ClInclude Include="Creatures\Server\CSE_ALifeSmartZone.h">
+      <Filter>Заголовочные файлы\Creatures\Server</Filter>
+    </ClInclude>
+    <ClInclude Include="Creatures\Server\CSE_ALifeTrader.h">
+      <Filter>Заголовочные файлы\Creatures\Server</Filter>
+    </ClInclude>
+    <ClInclude Include="Creatures\Server\CSE_ALifePsyDogPhantom.h">
+      <Filter>Заголовочные файлы\Creatures\Server</Filter>
+    </ClInclude>
+    <ClInclude Include="Console.h">
+      <Filter>Заголовочные файлы</Filter>
+    </ClInclude>
+    <ClInclude Include="Game.h">
+      <Filter>Заголовочные файлы</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Заголовочные файлы</Filter>
+    </ClInclude>
+    <ClInclude Include="events.h">
+      <Filter>Заголовочные файлы</Filter>
+    </ClInclude>
+    <ClInclude Include="motions.h">
+      <Filter>Заголовочные файлы</Filter>
+    </ClInclude>
+    <ClInclude Include="multipatch.h">
+      <Filter>Заголовочные файлы</Filter>
+    </ClInclude>
+    <ClInclude Include="..\X-Ray\xrclientdata.h">
+      <Filter>X-Ray</Filter>
+    </ClInclude>
+    <ClInclude Include="..\X-Ray\game_player_state.h">
+      <Filter>X-Ray</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\shared\log.cpp">
+      <Filter>Файлы исходного кода\shared</Filter>
+    </ClCompile>
+    <ClCompile Include="..\shared\hook.cpp">
+      <Filter>Файлы исходного кода\shared</Filter>
+    </ClCompile>
+    <ClCompile Include="Creatures\Client\CAI_Bloodsucker.cpp">
+      <Filter>Файлы исходного кода\Creatures\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="Creatures\Client\CAI_Boar.cpp">
+      <Filter>Файлы исходного кода\Creatures\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="Creatures\Client\CAI_Crow.cpp">
+      <Filter>Файлы исходного кода\Creatures\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="Creatures\Client\CAI_Dog.cpp">
+      <Filter>Файлы исходного кода\Creatures\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="Creatures\Client\CAI_Flesh.cpp">
+      <Filter>Файлы исходного кода\Creatures\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="Creatures\Client\CAI_PseudoDog.cpp">
+      <Filter>Файлы исходного кода\Creatures\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="Creatures\Client\CAI_Rat.cpp">
+      <Filter>Файлы исходного кода\Creatures\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="Creatures\Client\CAI_Stalker.cpp">
+      <Filter>Файлы исходного кода\Creatures\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="Creatures\Client\CAI_Trader.cpp">
+      <Filter>Файлы исходного кода\Creatures\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="Creatures\Client\CBaseMonster.cpp">
+      <Filter>Файлы исходного кода\Creatures\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="Creatures\Client\CBurer.cpp">
+      <Filter>Файлы исходного кода\Creatures\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="Creatures\Client\CCat.cpp">
+      <Filter>Файлы исходного кода\Creatures\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="Creatures\Client\CChimera.cpp">
+      <Filter>Файлы исходного кода\Creatures\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="Creatures\Client\CController.cpp">
+      <Filter>Файлы исходного кода\Creatures\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="Creatures\Client\CFracture.cpp">
+      <Filter>Файлы исходного кода\Creatures\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="Creatures\Client\CPhantom.cpp">
+      <Filter>Файлы исходного кода\Creatures\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="Creatures\Client\CPoltergeist.cpp">
+      <Filter>Файлы исходного кода\Creatures\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="Creatures\Client\CPseudoGigant.cpp">
+      <Filter>Файлы исходного кода\Creatures\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="Creatures\Client\CPsyDog.cpp">
+      <Filter>Файлы исходного кода\Creatures\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="Creatures\Client\CPsyDogPhantom.cpp">
+      <Filter>Файлы исходного кода\Creatures\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="Creatures\Client\CSnork.cpp">
+      <Filter>Файлы исходного кода\Creatures\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="Creatures\Client\CTushkano.cpp">
+      <Filter>Файлы исходного кода\Creatures\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="Creatures\Client\CZombie.cpp">
+      <Filter>Файлы исходного кода\Creatures\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="Creatures\Server\CSE_ALifeCreatureCrow.cpp">
+      <Filter>Файлы исходного кода\Creatures\Server</Filter>
+    </ClCompile>
+    <ClCompile Include="Creatures\Server\CSE_ALifeCreaturePhantom.cpp">
+      <Filter>Файлы исходного кода\Creatures\Server</Filter>
+    </ClCompile>
+    <ClCompile Include="Creatures\Server\CSE_ALifeCreatureRat.cpp">
+      <Filter>Файлы исходного кода\Creatures\Server</Filter>
+    </ClCompile>
+    <ClCompile Include="Creatures\Server\CSE_ALifeHumanStalker.cpp">
+      <Filter>Файлы исходного кода\Creatures\Server</Filter>
+    </ClCompile>
+    <ClCompile Include="Creatures\Server\CSE_ALifeMonsterBase.cpp">
+      <Filter>Файлы исходного кода\Creatures\Server</Filter>
+    </ClCompile>
+    <ClCompile Include="Creatures\Server\CSE_ALifeSmartZone.cpp">
+      <Filter>Файлы исходного кода\Creatures\Server</Filter>
+    </ClCompile>
+    <ClCompile Include="Creatures\Server\CSE_ALifeTrader.cpp">
+      <Filter>Файлы исходного кода\Creatures\Server</Filter>
+    </ClCompile>
+    <ClCompile Include="Creatures\Server\CSE_ALifePsyDogPhantom.cpp">
+      <Filter>Файлы исходного кода\Creatures\Server</Filter>
+    </ClCompile>
+    <ClCompile Include="events.cpp">
+      <Filter>Файлы исходного кода</Filter>
+    </ClCompile>
+    <ClCompile Include="motions.cpp">
+      <Filter>Файлы исходного кода</Filter>
+    </ClCompile>
+    <ClCompile Include="multipatch.cpp">
+      <Filter>Файлы исходного кода</Filter>
+    </ClCompile>
+    <ClCompile Include="soNetwork.cpp">
+      <Filter>Файлы исходного кода</Filter>
+    </ClCompile>
+    <ClCompile Include="Console.cpp">
+      <Filter>Файлы исходного кода</Filter>
+    </ClCompile>
+    <ClCompile Include="Game.cpp">
+      <Filter>Файлы исходного кода</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\soNetwork\soNetwork.rc">
+      <Filter>Файлы ресурсов</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+</Project>

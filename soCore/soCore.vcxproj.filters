@@ -1,0 +1,70 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Файлы исходного кода">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Заголовочные файлы">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Файлы ресурсов">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="X-Ray">
+      <UniqueIdentifier>{adc11571-e885-4759-b15b-d71dbbdcae7f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Заголовочные файлы\shared">
+      <UniqueIdentifier>{33bb6d94-39b5-4742-8556-98974bc7eab9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Файлы исходного кода\shared">
+      <UniqueIdentifier>{ed15bd9c-83c7-4dbd-989b-100e80f59299}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\X-Ray\CConsole.h">
+      <Filter>X-Ray</Filter>
+    </ClInclude>
+    <ClInclude Include="..\X-Ray\IConsole_Command.h">
+      <Filter>X-Ray</Filter>
+    </ClInclude>
+    <ClInclude Include="..\shared\hook.h">
+      <Filter>Заголовочные файлы\shared</Filter>
+    </ClInclude>
+    <ClInclude Include="multipatch.h">
+      <Filter>Заголовочные файлы</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Заголовочные файлы</Filter>
+    </ClInclude>
+    <ClInclude Include="md5.h">
+      <Filter>Заголовочные файлы</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="soCore.cpp">
+      <Filter>Файлы исходного кода</Filter>
+    </ClCompile>
+    <ClCompile Include="multipatch.cpp">
+      <Filter>Файлы исходного кода</Filter>
+    </ClCompile>
+    <ClCompile Include="..\shared\hook.cpp">
+      <Filter>Файлы исходного кода\shared</Filter>
+    </ClCompile>
+    <ClCompile Include="md5.cpp">
+      <Filter>Файлы исходного кода</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="soCore.rc">
+      <Filter>Файлы ресурсов</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="loadscreen.bmp">
+      <Filter>Файлы ресурсов</Filter>
+    </None>
+  </ItemGroup>
+</Project>
