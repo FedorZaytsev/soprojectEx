@@ -140,6 +140,7 @@ char* LevelAlifeSpawnFile = "alife";
 char* LevelScriptFile = "location_main";
 char* LevelDirectory = "$level$";
 char* LevelLocalPlayer = "get_local_player_id";
+char* str_ScriptLog = "script_log";
 char* SendDataToServer = "send_data_to_server";
 char* GetEventServer = "get_event_server";
 char* GetEventClient = "get_event_client";
@@ -154,6 +155,7 @@ void CLevel__Load_GameSpecific_Before_fix();
 void add_function_to_level();
 void add_function_to_level2();
 void send_data_to_server(LPCSTR data,bool b);
+void script_log(LPCSTR data,bool b);
 unsigned int get_local_player();
 void CControlDirection__update_frame(DWORD pClass);
 DWORD F_entity_Create_fix(DWORD pClass);
@@ -704,9 +706,19 @@ void CHook_Patch_02::InstallHooks()
 	Address(((DWORD)add_function_to_lvl1 + 115),(DWORD)GetEventClient);
 	Byte(((DWORD)add_function_to_lvl1 + 119),1,0x50);
 	Call(((DWORD)add_function_to_lvl1 + 120),(DWORD)GameOffset + 0x24166C);
+	
+	Byte(((DWORD)add_function_to_lvl1 + 125),2,0x59);
+	Byte(((DWORD)add_function_to_lvl1 + 127),1,0x8B);
+	Byte(((DWORD)add_function_to_lvl1 + 128),1,0xC4);
+	Byte(((DWORD)add_function_to_lvl1 + 129),1,0x68);
+	Address(((DWORD)add_function_to_lvl1 + 130),(DWORD)&script_log);
+	Byte(((DWORD)add_function_to_lvl1 + 134),1,0x68);
+	Address(((DWORD)add_function_to_lvl1 + 135),(DWORD)str_ScriptLog);
+	Byte(((DWORD)add_function_to_lvl1 + 139),1,0x50);
+	Call(((DWORD)add_function_to_lvl1 + 140),(DWORD)GameOffset + 0x2416C7);
 
 	//
-	Jmp(((DWORD)add_function_to_lvl1 + 125),(DWORD) GameOffset + 0x24A71F + 5);
+	Jmp(((DWORD)add_function_to_lvl1 + 145),(DWORD) GameOffset + 0x24A71F + 5);
 
 
 	Jmp(((DWORD)GameOffset + 0x24A71F),(DWORD) add_function_to_lvl1);
@@ -755,8 +767,13 @@ void CHook_Patch_02::InstallHooks()
 	Byte(((DWORD)add_function_to_lvl2 + 29),1,0xC8);
 	Byte(((DWORD)add_function_to_lvl2 + 30),1,0xFF);
 	Byte(((DWORD)add_function_to_lvl2 + 31),1,0xD6);
+	
+	Byte(((DWORD)add_function_to_lvl2 + 32),1,0x8B);
+	Byte(((DWORD)add_function_to_lvl2 + 33),1,0xC8);
+	Byte(((DWORD)add_function_to_lvl2 + 34),1,0xFF);
+	Byte(((DWORD)add_function_to_lvl2 + 35),1,0xD6);
 
-	Jmp(((DWORD)add_function_to_lvl2 + 32),(DWORD)GameOffset + 0x24A762 + 5);
+	Jmp(((DWORD)add_function_to_lvl2 + 36),(DWORD)GameOffset + 0x24A762 + 5);
 
 	Jmp(((DWORD)GameOffset + 0x24A762),(DWORD) add_function_to_lvl2);
 	Byte(((DWORD)GameOffset + 0x24A762 + 5),3,0x90);
@@ -1442,6 +1459,10 @@ void send_data_to_server(LPCSTR data,bool b) {
 	}
 }
 
+void script_log(LPCSTR data,bool b) {
+	LogHandle->Write(data);
+}
+
 WORD CHook_Patch_02::CreateObject(char* section,char* name,float pos_x,float pos_y,float pos_z,WORD parentid)
 {
 	float position[3];
@@ -1902,9 +1923,19 @@ void CHook_Patch_02_Client::InstallHooks() {
 	Address(((DWORD)add_function_to_lvl1 + 115),(DWORD)GetEventClient);
 	Byte(((DWORD)add_function_to_lvl1 + 119),1,0x50);
 	Call(((DWORD)add_function_to_lvl1 + 120),(DWORD)GameOffset + 0x24166C);
+	
+	Byte(((DWORD)add_function_to_lvl1 + 125),2,0x59);
+	Byte(((DWORD)add_function_to_lvl1 + 127),1,0x8B);
+	Byte(((DWORD)add_function_to_lvl1 + 128),1,0xC4);
+	Byte(((DWORD)add_function_to_lvl1 + 129),1,0x68);
+	Address(((DWORD)add_function_to_lvl1 + 130),(DWORD)&script_log);
+	Byte(((DWORD)add_function_to_lvl1 + 134),1,0x68);
+	Address(((DWORD)add_function_to_lvl1 + 135),(DWORD)str_ScriptLog);
+	Byte(((DWORD)add_function_to_lvl1 + 139),1,0x50);
+	Call(((DWORD)add_function_to_lvl1 + 140),(DWORD)GameOffset + 0x2416C7);
 
 	//
-	Jmp(((DWORD)add_function_to_lvl1 + 125),(DWORD) GameOffset + 0x24A71F + 5);
+	Jmp(((DWORD)add_function_to_lvl1 + 145),(DWORD) GameOffset + 0x24A71F + 5);
 
 
 	Jmp(((DWORD)GameOffset + 0x24A71F),(DWORD) add_function_to_lvl1);
@@ -1953,8 +1984,13 @@ void CHook_Patch_02_Client::InstallHooks() {
 	Byte(((DWORD)add_function_to_lvl2 + 29),1,0xC8);
 	Byte(((DWORD)add_function_to_lvl2 + 30),1,0xFF);
 	Byte(((DWORD)add_function_to_lvl2 + 31),1,0xD6);
+	
+	Byte(((DWORD)add_function_to_lvl2 + 32),1,0x8B);
+	Byte(((DWORD)add_function_to_lvl2 + 33),1,0xC8);
+	Byte(((DWORD)add_function_to_lvl2 + 34),1,0xFF);
+	Byte(((DWORD)add_function_to_lvl2 + 35),1,0xD6);
 
-	Jmp(((DWORD)add_function_to_lvl2 + 32),(DWORD)GameOffset + 0x24A762 + 5);
+	Jmp(((DWORD)add_function_to_lvl2 + 36),(DWORD)GameOffset + 0x24A762 + 5);
 
 	Jmp(((DWORD)GameOffset + 0x24A762),(DWORD) add_function_to_lvl2);
 	Byte(((DWORD)GameOffset + 0x24A762 + 5),3,0x90);

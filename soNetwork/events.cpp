@@ -12,7 +12,7 @@ extern CHook* HookHandle;
 
 void CLevel__cl_Process_CustomEvent(NET_Packet& pack)
 {
-	if (!HookHandle->IsServer() || (HookHandle->IsServer() && HookHandle->IsDedicated())) {
+	if (!HookHandle->IsServer() || (HookHandle->IsServer() && !HookHandle->IsDedicated())) {
 		char data[2048];
 		pack.r_stringZ(data);
 		LogHandle->Write("Recieved data at client side '%s'",data);
