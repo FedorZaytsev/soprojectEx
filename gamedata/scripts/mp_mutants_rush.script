@@ -118,7 +118,6 @@ function CMutantsRush:respawn()
 end
 
 function CMutantsRush:prepareTimer()
-	cout("CMutantsRush:prepareTimer")
 	if not level.is_server() or not level.is_dedicated() then
 		local st = get_hud():GetCustomStatic("mp_prepare_to_battle")
 		if not st then
@@ -133,7 +132,6 @@ function CMutantsRush:prepareTimer()
 	else
 		self:respawn()
 	end
-	cout("CMutantsRush:prepareTimer end")
 end
 
 

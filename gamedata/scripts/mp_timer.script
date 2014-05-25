@@ -18,6 +18,8 @@ class "CTimerManager"
 function CTimerManager:__init()
 	self.__timers = {}
 	self.timer_id = 0
+	self.is_updating = false
+	self.temp_timers = {}
 end
 
 function CTimerManager:generateName(name)
@@ -34,18 +36,29 @@ function CTimerManager:generateName(name)
 end
 
 function CTimerManager:add(params)
-	cout("timer add")
 	if type(params.ms)~="number" or type(params.callback)~="function" then
 		cout("mp_timer: timer is setted wrong with params: name = %s, ms = %s, callback = %s",tolog(params.name),tolog(params.ms),tolog(params.callbacks))
 	end
 	
-	self.__timers[self:generateName(params.name)] = {
-		["time_start"] = time_global(),
-		["time"] = params.ms,
-		["callback"] = params.callback,
-		["reiterate"] = params["reiterate"] == true
-	}
-	cout("timer end")
+	local name = self:generateName(params.name)
+
+	cout("timer add %s",name)
+	if not self.is_updating then
+		self.__timers[name] = {
+			["time_start"] = time_global(),
+			["time"] = params.ms,
+			["callback"] = params.callback,
+			["reiterate"] = params["reiterate"] == true
+		}
+	else
+		table.insert(self.temp_timers, {
+			["time_start"] = time_global(),
+			["time"] = params.ms,
+			["callback"] = params.callback,
+			["reiterate"] = params["reiterate"] == true,
+			["name"] = name
+		})
+	end
 	
 end
 
@@ -58,6 +71,8 @@ end
 
 function CTimerManager:update()
 	local timers_to_delete = {}
+	self.is_updating = true
+	
 	for name,timer in pairs(self.__timers) do
 		if time_global() > timer.time + timer.time_start then
 			cout("calling %s repeat? %s %s",name,tostring(timer["reiterate"]),tolog(timer.callback))
@@ -70,9 +85,20 @@ function CTimerManager:update()
 		end
 	end
 	for _,name in pairs(timers_to_delete) do
-		cout("deleting %s",name)
 		self:remove(name)
 	end
+	
+	for _,p in pairs(self.temp_timers) do
+		self.__timers[p.name] = {
+			["time_start"] = p.time_start,
+			["time"] = p.time,
+			["callback"] = p.callback,
+			["reiterate"] = p.reiterate
+		}
+	end
+	self.temp_timers = {}
+	
+	self.is_updating = false
 end
 
 function updateTM()
@@ -81,6 +107,7 @@ end
 
 function get()
 	if not __global then
+		cout("mp_timer.get new")
 		__global = CTimerManager()
 	end
 	return __global

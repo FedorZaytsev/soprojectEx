@@ -105,6 +105,7 @@ function EventHolder:update()
 	local e = self:getEvent()
 	
 	while e and type(e) == "string" and e ~= "" do
+		cout("e is %s",e)
 		local e_type = string.sub(e,0,string.find(e,"|")-1)
 		local msg = string.sub(e,string.find(e,"|")+1)
 		cout("received event '%s' with msg '%s'",e_type,msg)
