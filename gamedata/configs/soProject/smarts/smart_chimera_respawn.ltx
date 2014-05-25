@@ -1,0 +1,15 @@
+[smart_terrain]
+squad_id = 5
+max_population = 1
+
+arrive_dist = 50
+
+[respawn@smart_chimera_respawn]
+spawn_chimera
+
+[spawn_chimera]
+spawn_squads = simulation_chimera
+spawn_num = {=mutants_rush_ready} 1,0
+
+[exclusive]
+mutant_rush = mutant_rush_logic.ltx

@@ -1,0 +1,91 @@
+function mylog(msg,...)
+	get_console():execute(string.gsub(string.format(msg,...)," ","_"))
+end
+
+function actor_init(npc)
+	npc:bind_object(mp_binder(npc))
+end
+
+
+--Важная заметочка: когда объект только создается, то local_player возвращает не наш объект, а spectator. Наш объект будет ~на следующем апгрейде
+
+
+----------------------------------------------------------------------------------------------------------------------
+class "mp_binder" (object_binder)
+----------------------------------------------------------------------------------------------------------------------
+function mp_binder:__init (obj) super(obj)
+	mylog("mp_binder init %s",self.object:name())
+	
+	--cout("%s",tolog(level.get_time_days()))
+	cout("%s",tolog(level.get_local_player_id))
+	--cout("%s",tolog(level.get_local_player_id()))s
+	
+	cout("%s",tolog(level.get_local_player_id()))
+	--level.send_data_to_server("send data argument")
+--[[
+	mp_timer.get():add({ms=2*1000,["repeat"]=true,callback = 	function() 
+													cout("Callback is called %s",tostring(mp_db.is_admin()))
+													if not alife() then
+														cout("OMG, there is no alife!!!!")
+													end
+													for i=0,65534 do 
+														local obj
+														if not alife() then
+															obj = level.object_by_id(i)
+														else
+															obj = alife():object(i)
+														end
+														
+														if obj and ((obj.section and obj:section()=="actor") or (obj.section_name and obj:section_name()=="actor")) then
+															cout("actor is found %s",tostring(obj.myTestCommands))
+															break
+														end
+													end
+												end
+						})--]]
+
+end
+----------------------------------------------------------------------------------------------------------------------
+function mp_binder:net_spawn(data)
+	mylog("mp_binder net_spawn")
+	if object_binder.net_spawn(self,data) == false then
+		return false
+	end
+	mp_db.add_actor(self.object)
+	return true
+end
+----------------------------------------------------------------------------------------------------------------------
+function mp_binder:net_destroy()
+	mylog("mp_binder net_destroy")
+	mp_db.delete_actor(self.object)
+	object_binder.net_destroy(self)
+end
+----------------------------------------------------------------------------------------------------------------------
+function mp_binder:reinit()
+	object_binder.reinit(self)
+	mylog("mp_binder reinit")
+end
+----------------------------------------------------------------------------------------------------------------------
+
+function mp_binder:update(delta)
+	object_binder.update(self, delta)
+end
+----------------------------------------------------------------------------------------------------------------------
+function actor_binder:save(packet)
+	object_binder.save(self, packet)
+	mylog("mp_binder save")
+end
+----------------------------------------------------------------------------------------------------------------------
+function actor_binder:load(reader)
+	object_binder.load(self, reader)
+	mylog("mp_binder load")
+end
+
+
+
+
+
+
+
+
+

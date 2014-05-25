@@ -1,0 +1,136 @@
+ __actors = {}
+ __admin = nil
+ __we_admin = false
+ __functions_to_update = {}
+ __loaded = false
+ __event_holder = nil
+
+function on_start()
+	cout("on_start")
+	mp_timer.main()
+end
+
+function on_start_server()
+	cout("on_start_server")
+	mp_mutants_rush.setup()
+end
+
+function add_actor(obj)
+	__actors[obj:id()] = obj
+	cout("added actor with id %d %s %s",obj:id(),obj:name(),obj:section())
+end
+
+function delete_actor(obj)
+	__actors[obj:id()] = nil
+end
+
+function actors()
+	return __actors
+end
+
+function for_each_actor(func)
+	for k,obj in pairs(__actors) do
+		func(obj)
+	end
+end
+
+function add_admin(obj)
+	cout("added actor with id %d %s %s",obj:id(),obj:name(),obj:section())
+	if obj and not __admin then
+		__admin = obj
+		mp_db.on_start_server()
+	end
+end
+
+function admin()
+	return __admin
+end
+
+function is_admin(flag)
+	if flag ~= nil then __we_admin = flag return end
+	return __admin~=nil
+end
+
+function update(func)
+	if func then
+		table.insert(__functions_to_update,func)
+	else
+		for i=1,#__functions_to_update do
+			__functions_to_update[i]()
+		end
+	end
+end
+
+function setup_update(self)
+	if not __loaded then
+		cout("setup_update")
+		__loaded = true
+		mp_db.on_start()
+		self.object:set_fastcall(function () mp_db.update() end,self)
+		mp_db.update(function () mp_db.getEH():update() end)
+	end
+end
+
+
+
+
+class "EventHolder"
+function EventHolder:__init()
+	self.listners = {}
+end
+
+function EventHolder:callAtEvent(e, func)
+	cout("set listner callAtEvent %s",e)
+	if type(e) ~= "string" or type(func) ~= "function" then
+		abort("EventHolder:callAtEvent error")
+	end
+	if not self.listners[e] then
+		self.listners[e] = {}
+	end
+	table.insert(self.listners[e],func)
+end
+
+function EventHolder:getEvent()
+	local e = ""
+	if level.is_server() then
+		e = level.get_event_server()
+	end
+	if e=="" and ((level.is_server() and not level.is_dedicated()) or not level.is_server()) then
+		e = level.get_event_client()
+	end
+	return e
+end
+
+function EventHolder:update()
+	local e = self:getEvent()
+	
+	while e and type(e) == "string" and e ~= "" do
+		local e_type = string.sub(e,0,string.find(e,"|")-1)
+		local msg = string.sub(e,string.find(e,"|")+1)
+		cout("received event '%s' with msg '%s'",e_type,msg)
+		if self.listners[e_type] then
+			for k, v in pairs(self.listners[e_type]) do
+				v(msg)
+			end
+		else 
+			cout("No listners for %s, is that ok?",e_type)
+		end
+		e = self:getEvent()
+	end
+end
+
+function EventHolder:send(e,msg)
+	if type(e) ~= "string" or type(msg) ~= "string" and e ~= "" then
+		cout("EventHolder:send error")
+		return false
+	end
+	cout("msg %s %s",string.format("%s|%s",e,msg),tostring(level.present()))
+	level.send_data_to_server(string.format("%s|%s",e,msg),true)
+end
+
+function getEH()
+	if not __event_holder then
+		__event_holder = EventHolder()
+	end
+	return __event_holder
+end

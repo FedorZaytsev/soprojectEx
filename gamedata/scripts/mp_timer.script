@@ -1,0 +1,97 @@
+--[[
+	Модуль таймеров. Lobster (Федор Зайцев) январь 2014
+--]]
+
+local __global = nil
+
+
+--[[
+	usage: add({
+			["ms"] = 1,
+			["callback"] = function() end,
+			["reiterate"] = true
+			["name"] = "test"})
+--]]
+
+class "CTimerManager"
+
+function CTimerManager:__init()
+	self.__timers = {}
+	self.timer_id = 0
+end
+
+function CTimerManager:generateName(name)
+	if name then
+		if self.__timers[name] or type(name)~="string" then
+			abort("mp_timer: already used name %s or name is not a string",tolog(name))
+			return "error"
+		end
+		return name
+	end
+	name = "___#"..tostring(self.timer_id)
+	self.timer_id = self.timer_id+1
+	return name
+end
+
+function CTimerManager:add(params)
+	cout("timer add")
+	if type(params.ms)~="number" or type(params.callback)~="function" then
+		cout("mp_timer: timer is setted wrong with params: name = %s, ms = %s, callback = %s",tolog(params.name),tolog(params.ms),tolog(params.callbacks))
+	end
+	
+	self.__timers[self:generateName(params.name)] = {
+		["time_start"] = time_global(),
+		["time"] = params.ms,
+		["callback"] = params.callback,
+		["reiterate"] = params["reiterate"] == true
+	}
+	cout("timer end")
+	
+end
+
+function CTimerManager:remove(name)
+	if type(name)~="string" or not self.__timers[name] then
+		cout("mp_timer: remove name = %s",tolog(name))
+	end
+	self.__timers[name] = nil
+end
+
+function CTimerManager:update()
+	local timers_to_delete = {}
+	for name,timer in pairs(self.__timers) do
+		if time_global() > timer.time + timer.time_start then
+			cout("calling %s repeat? %s %s",name,tostring(timer["reiterate"]),tolog(timer.callback))
+			timer["callback"](name)
+			if timer["reiterate"] then
+				timer.time_start = time_global()
+			else
+				table.insert(timers_to_delete,name)
+			end
+		end
+	end
+	for _,name in pairs(timers_to_delete) do
+		cout("deleting %s",name)
+		self:remove(name)
+	end
+end
+
+function updateTM()
+	get():update()
+end
+
+function get()
+	if not __global then
+		__global = CTimerManager()
+	end
+	return __global
+end
+
+
+function main()
+	cout("mp_timer.main")
+	mp_db.update(function (obj) mp_timer.get():update() return false end)
+end
+
+
+
+

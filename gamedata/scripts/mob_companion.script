@@ -1,0 +1,121 @@
+--[[ Схема Компаньон для связки Актор - Монстр
+	makdm, 2013 для Gladiator addon
+]]--
+local desired_distance = 1
+local default_anim_standing = anim.stand_idle
+
+class "mob_companion"
+
+function mob_companion:__init(obj, storage)
+	self.object = obj
+	self.st = storage
+end
+
+function mob_companion:reset_scheme()
+	mob_state_mgr.set_state(self.object, nil, self.st.state)
+	xr_logic.mob_capture(self.object, true)
+	self.assist_point = nil
+	self.object:disable_talk()
+end
+
+function mob_companion:update(delta)
+	if not xr_logic.mob_captured(self.object) then
+		self:reset_scheme()
+		return
+	end
+	self:mob_move_to_actor()
+end
+------------------------------------------------------------------------------------------------------------------------------------------------
+function mob_companion:select_position(npc)
+	local node_1_vertex_id = nil
+	local node_1_distance = nil
+	local node_2_vertex_id = nil
+	local node_2_distance = nil
+	local actor = level.object_by_id(self.st.target_id)
+	desired_direction = vector_rotate_y(actor:direction(), math.random(50,60) )
+	node_1_vertex_id = level.vertex_in_direction(	actor:level_vertex_id(),
+													desired_direction,
+													desired_distance)
+	if npc:accessible(node_1_vertex_id) ~= true or node_1_vertex_id == actor:level_vertex_id() then
+		node_1_vertex_id = nil
+	end
+	desired_direction = vector_rotate_y(actor:direction(), -math.random(50,60) )
+	node_2_vertex_id = level.vertex_in_direction (  actor:level_vertex_id(),
+													desired_direction,
+													desired_distance )
+	if npc:accessible(node_2_vertex_id) ~= true or node_2_vertex_id == actor:level_vertex_id() then
+		node_2_vertex_id = nil
+	end
+	if node_1_vertex_id ~= nil then
+		node_1_distance = npc:position():distance_to_sqr(level.vertex_position(node_1_vertex_id))
+	else
+		node_1_distance = -1
+	end
+	if node_2_vertex_id ~= nil then
+		node_2_distance = npc:position():distance_to_sqr(level.vertex_position(node_2_vertex_id))
+	else
+		node_2_distance = -1
+	end
+	if node_1_distance == -1 and node_2_distance == -1 then
+		return nil
+	end
+	if node_1_distance == -1 then
+		return node_2_vertex_id
+	end
+	if node_2_distance == -1 then
+		return node_1_vertex_id
+	end
+	if node_1_distance < node_2_distance then
+		return node_1_vertex_id
+	else
+		return node_2_vertex_id
+	end
+end
+
+local function vector_rotate_y (v, angle)
+		angle = angle * 0.017453292519943295769236907684886
+		local c = math.cos (angle)
+		local s = math.sin (angle)
+		return vector ():set (v.x * c - v.z * s, v.y, v.x * s + v.z * c)
+end
+----------------------------------------------------------------------------------------------------------------------------------------------
+function mob_companion:mob_move_to_actor()
+	local actor = level.object_by_id(self.st.target_id)
+	cout("move_to_actor")
+	local select_new_pt = false
+	local dist_from_self_to_actor = self.object:position():distance_to(actor:position())
+	local dist_from_assist_pt_to_actor
+	if self.assist_point then
+		dist_from_assist_pt_to_actor = level.vertex_position(self.assist_point):distance_to(actor:position())
+	else
+		dist_from_assist_pt_to_actor = nil
+	end
+	if dist_from_self_to_actor >= desired_distance and (not dist_from_assist_pt_to_actor or	dist_from_assist_pt_to_actor >= desired_distance * 2) then
+		select_new_pt = true
+	end
+	if select_new_pt then
+		self.assist_point = self:select_position(self.object)
+		if not self.assist_point then	return	end
+	elseif not self.assist_point then
+		return
+	end
+	self.cur_anim_set = default_anim_standing
+	if self.object:level_vertex_id() == self.assist_point then
+		action(self.object, anim(self.cur_anim_set, 0))
+		return
+	else
+		action(self.object,move(move.run_fwd,level.vertex_position(self.assist_point)))
+	end
+end
+
+function add_to_binder(npc, ini, scheme, section, storage)
+	local new_action = mob_companion(npc, storage)
+	xr_logic.subscribe_action_for_events(npc, storage, new_action)
+end
+
+function set_scheme(npc, ini, scheme, section, gulag_name)
+	local storage = xr_logic.assign_storage_and_bind(npc, ini, scheme, section)
+	storage.logic      	= xr_logic.cfg_get_switch_conditions(ini, section, npc)
+	storage.state      	= mob_state_mgr.get_state(ini, section, npc)
+	storage.target_id	= level.get_local_player_id()--utils.cfg_get_string(ini, section, "target_actor_id",			npc, false, gulag_name)
+end

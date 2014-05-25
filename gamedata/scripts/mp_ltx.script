@@ -1,0 +1,38 @@
+
+
+function assert_ltx_read(ini,section,key)
+	if not type(ini)=="object" or not type(section)=="string" or not type(key)=="string" then
+		abort("mp_ltx: invalid params to ltx_read_string: ini = %s, section = %s, key = %s",tolog(ini),tolog(section),tolog(key))
+	end
+	if not ini:section_exist(section) then
+		abort("mp_ltx: section %s doesn't exist",section)
+	end
+	if not ini:line_exist(section,key) then
+		abort("mp_ltx: line %s in section %s doesn't exist",key,section)
+	end
+end
+
+function ltx_read_string(ini,section,key)
+	assert_ltx_read(ini,section,key)
+	return ini:r_string(section,key)
+end
+
+function ltx_read_s32(ini,section,key)
+	assert_ltx_read(ini,section,key)
+	return ini:r_s32(section,key)
+end
+
+function ltx_read_u32(ini,section,key)
+	assert_ltx_read(ini,section,key)
+	return ini:r_u32(section,key)
+end
+
+function ltx_read_float(ini,section,key)
+	assert_ltx_read(ini,section,key)
+	return ini:r_float(section,key)
+end
+
+function ltx_read_bool(ini,section,key)
+	assert_ltx_read(ini,section,key)
+	return ini:r_bool(section,key)
+end
