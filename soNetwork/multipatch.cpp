@@ -769,12 +769,12 @@ void CHook_Patch_02::InstallHooks()
 	// create EventLocServer
 	void* event_loc_server = malloc(100);
 	/*
-		push ebp
+		push edi
 		call EventFunc
 		add esp, 4h
-		jmp 1023B669
+		jmp 1034DB19
 	*/
-	Byte(((DWORD)event_loc_server + 0),1,0x55); // push ebp
+	Byte(((DWORD)event_loc_server + 0),1,0x57); // push edi
 	Call(((DWORD)event_loc_server + 1),(DWORD)&CLevel__cl_Process_CustomEventServer); // call EventFunc
 	Byte(((DWORD)event_loc_server + 6),1,0x83);		// add esp, 4
 	Byte(((DWORD)event_loc_server + 7),1,0xC4);
