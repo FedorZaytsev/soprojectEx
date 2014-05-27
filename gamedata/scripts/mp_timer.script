@@ -35,14 +35,24 @@ function CTimerManager:generateName(name)
 	return name
 end
 
-function CTimerManager:add(params)
+--[[
+	Параметр called_from нужен для того случая, когда мы вызываем обновление таймеров после их вызовов, но по какой-то причине self.is_updating оказался true
+	В любом случае если не лазить ручками, то все будет работать
+--]]
+function CTimerManager:add(params,called_from)
+	if called_from and self.is_updating then
+		cout("ERROR! called_from (%s) is setted, but self.is_updating is also true",called_from)
+		abort("ERROR ABOVE")
+	end
 	if type(params.ms)~="number" or type(params.callback)~="function" then
 		cout("mp_timer: timer is setted wrong with params: name = %s, ms = %s, callback = %s",tolog(params.name),tolog(params.ms),tolog(params.callbacks))
 	end
 	
 	local name = self:generateName(params.name)
 
-	cout("timer add %s",name)
+	if not self.is_updating then
+		cout("timer add %s",name)
+	end
 	if not self.is_updating then
 		self.__timers[name] = {
 			["time_start"] = time_global(),
@@ -52,25 +62,36 @@ function CTimerManager:add(params)
 		}
 	else
 		table.insert(self.temp_timers, {
-			["time_start"] = time_global(),
-			["time"] = params.ms,
-			["callback"] = params.callback,
-			["reiterate"] = params["reiterate"] == true,
-			["name"] = name
-		})
+		["state"] = "add",
+		["data"] = {
+				["ms"] = params.ms,
+				["name"] = name,
+				["callback"] = params.callback,
+				["reiterate"] = params["reiterate"] == true,
+
+			}})
 	end
 	
 end
 
-function CTimerManager:remove(name)
+function CTimerManager:remove(name,called_from)
+	if called_from and self.is_updating then
+		cout("ERROR! called_from (%s) is setted, but self.is_updating is also true",called_from)
+		abort("ERROR ABOVE")
+	end
 	if type(name)~="string" or not self.__timers[name] then
 		cout("mp_timer: remove name = %s",tolog(name))
 	end
-	self.__timers[name] = nil
+	if not self.is_updating then 
+		self.__timers[name] = nil
+	else
+		table.insert(self.temp_timers, {
+		["data"] = name,
+		["state"] = "delete"})
+	end
 end
 
 function CTimerManager:update()
-	local timers_to_delete = {}
 	self.is_updating = true
 	
 	for name,timer in pairs(self.__timers) do
@@ -80,25 +101,23 @@ function CTimerManager:update()
 			if timer["reiterate"] then
 				timer.time_start = time_global()
 			else
-				table.insert(timers_to_delete,name)
+				self:remove(name)
 			end
 		end
 	end
-	for _,name in pairs(timers_to_delete) do
-		self:remove(name)
-	end
+	
+	-- !!! Must be before iterate over temp_timers
+	self.is_updating = false
 	
 	for _,p in pairs(self.temp_timers) do
-		self.__timers[p.name] = {
-			["time_start"] = p.time_start,
-			["time"] = p.time,
-			["callback"] = p.callback,
-			["reiterate"] = p.reiterate
-		}
+		if p.state == "add" then
+			self:add(p.data,"cycle self.temp_timers")
+		else
+			self:remove(p.data,"cycle self.temp_timers")
+		end
 	end
 	self.temp_timers = {}
 	
-	self.is_updating = false
 end
 
 function updateTM()

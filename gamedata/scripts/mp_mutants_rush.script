@@ -94,24 +94,11 @@ function CMutantsRush:respawn()
 	for id,obj in pairs(db.smart_terrain_by_id) do
 		--if obj.respawn_params then
 			--cout("Found good smart to spawn %s 123",obj:name())
-			
-			--Emulating smart_terrain:call_respawn()
-			--cout("data (%d,%d,%d) %d %d %s %s",obj.position.x,obj.position.y,obj.position.z,obj.m_level_vertex_id,obj.m_game_vertex_id,tostring(level.is_dedicated()),tostring(level.is_server()))
-			--alife()
-			cout("ololo")
-			
+
 			alife():create("boar_normal",obj.position,obj.m_level_vertex_id,obj.m_game_vertex_id)
 			cout("ololo2")
 			count = count + 1
-			--alife():create("simulation_boar",vector():set(137.540146,-0.000004,331.220367),15474,0)
-			--squad = obj.board:create_squad("simulation_boar", squad)
-			--[[squad.respawn_point_id = obj.id
-			squad.respawn_point_prop_section = sect_to_spawn
-			obj.board:enter_smart(squad, obj.id)
-			for m in squad:squad_members() do
-				obj.board:setup_squad_and_group(m.object)
-			end--]]
-			--obj:call_respawn()
+
 		--end
 	end
 	cout("spawned %d boars",count)
@@ -128,7 +115,7 @@ function CMutantsRush:prepareTimer()
 	end
 	self.prepare_counter = self.prepare_counter - 1
 	if self.prepare_counter ~= 0 then
-		mp_timer.get():add({ms=1*1000,callback = function() cout("prepare timer callback") mp_mutants_rush.get():prepareTimer() end})
+		mp_timer.get():add({ms=1*1000,callback = function() mp_mutants_rush.get():prepareTimer() end})
 	else
 		self:respawn()
 	end
