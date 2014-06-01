@@ -1,0 +1,176 @@
+
+--------------------------------------------------------------------------------------------- Файлы ---------------------------------------------------------------------------------------------
+File: mp_db
+Общее описание:
+	Содержит различные служебные функции и константы
+Описание функций:
+	
+	bool mp_db.is_admin()
+		Описание:
+			НЕ РЕКОМЕНДУЕТСЯ к использованию
+			Возвращает true если сервер (скриптовый эквивалент level.is_server())
+		Description:
+			NOT RECOMMENDED for use
+			Return true if server
+	
+	void mp_db.update(f)
+		Описание:
+			Добавляет функцию f в массив функций для апгрейда
+		Description:
+			Add function f in array of functions f update
+		
+	userdata mp_db.getEH()
+		Описание:
+			Возвращает глобальный объект EventHolder
+		Description:
+			Returns global object EventHolder
+			
+Описание классов:
+	class EventHolder
+		
+		void EventHolder::callAtEvent(e,f)
+			e - string
+			f - function
+			Описание:
+				Вызывает функцию f при получении события e
+			Description:
+				Call function f at event e
+		
+		void EventHolder::send(e,data)
+			e - string
+			data - string
+			Описание:
+				Отправляет событие e с дополнительными данными data
+			Description:
+				Send event e with additional data "data"
+	
+
+	
+	
+File: mp_timer
+Общее описание:
+	Таймера
+Описание функций:
+	
+	userdata mp_timer.get()
+		Описание:
+			Возвращает глобальный объект CTimerManager
+		Description:
+			Returns global object CTimerManager
+
+Описание классов:
+	class CTimerManager
+		
+		void CTimerManager::add(params)
+			params - {
+						["ms"] = 1,
+						["callback"] = function() end,
+						["reiterate"] = true
+						["name"] = "test"
+					}
+			Описание:
+				Добавляет таймер с указаными параметрами
+			Description:
+				Add timer with params
+		
+		void CTimerManager::remove(name)
+			Описание:
+				Удаляет таймер по имени
+			Description:
+				Delete timer by name
+
+		
+File: mp_mutants_rush
+Общее описание:
+	Релизует логику работы режима "Война с мутантами"
+
+
+
+
+
+--------------------------------------------------------------------------------------------- Функции ---------------------------------------------------------------------------------------------
+Functions:
+	number		level.get_local_player_id		()
+	void		level.add_money_mp				(u16 id,int money)
+	void		level.script_log				(string)
+	void		level.send_data_to_server		(string)
+	string		level.get_event_server			()
+	string		level.get_event_client			()
+	bool		level.is_server					()
+	bool		level.is_dedicated				()
+	
+	
+	
+Function:
+	number level.get_local_player_id()
+Описание:
+	возвращает id игрока (внутриигровой)
+Description:
+	returns local player identificator
+
+Function:
+	void level.add_money_mp(u16 id,int money)
+Описание:
+	добавляет игроку с id некоторое количество денег (отрицательное число отнимет деньги)
+Description:
+	Add for player with identificator id some amount of money (money can be negative)
+
+Function:
+	void level.script_log(string)
+Описание:
+	Выводит строку в лог (в обычный (не сохраняется автоматически) и в лог лаунчера)
+Description:
+	Write string to log (in common and in launcher log too)
+
+Function:
+	void level.send_data_to_server(string)
+Описание:
+	НЕ РЕКОМЕНДУЕТСЯ к прямому вызову (используйте mp_db.getEH():send)
+	Если вызывается со стороны сервера:
+		Отправляет строку всем клиентам
+	Если вызывается со стороны клиента:
+		Отправляет строку серверу
+Description:
+	NOT RECOMMENDED for direct call (use mp_db.getEH():send)
+	If called at server side:
+		Send string for all clients
+	If called at client side:
+		Send string for server
+
+Function:
+	string level.get_event_server()
+Описание:
+	НЕ РЕКОМЕНДУЕТСЯ к прямому вызову (используйте mp_db.getEH():callAtEvent)
+	Возвращает одно событие из всей очереди серверных событий или пустую строку если событий больше нет
+	При вызове на стороне клиента вернет пустую строку и напишет в лог ошибку
+Description:
+	NOT RECOMMENDED for direct call (use mp_db.getEH():callAtEvent)
+	Return one event from query of events or empty string if there is no more events
+	At call from client side returns empty string and write error to console
+
+Function:
+	string level.get_event_client()
+Описание:
+	НЕ РЕКОМЕНДУЕТСЯ к прямому вызову (используйте mp_db.getEH():callAtEvent)
+	Возвращает одно событие из всей очереди клиентских событий или пустую строку если событий больше нет
+	При вызове на стороне сервера вернет пустую строку и напишет в лог ошибку
+Description:
+	NOT RECOMMENDED for direct call (use mp_db.getEH():callAtEvent)
+	Return one event from query of events or empty string if there is no more events
+	At call from server side returns empty string and write error to console
+
+Function:
+	bool level.is_server()
+Описание:
+	Возвращает true если сервер
+Description:
+	Return true if server
+	
+Function:
+	bool level.is_dedicated()
+Описание:
+	Возвращает true если это выделеный сервер
+Description:
+	Return true if dedicated server
+
+

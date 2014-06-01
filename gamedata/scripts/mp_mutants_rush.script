@@ -1,6 +1,21 @@
 local fname = "mp_mutants_rush"
 local __global = nil
-local __timer_prepare = 0
+
+
+
+--[[
+
+Нет желания описывать каждую функцию, поэтому напишу лишь главную идею
+
+1. Устанавливаем необходимые обработчики событий
+2. Загружаем если нужно необходимые данные
+3. Начинаем обратные отсчет до старта, устанавливая таймер на секунду каждый раз и отсылая клиентам событие mr_cl_prepare
+4. Когда раунд начинается вызываем CMutantsRush::respawn() и отсылаем клиентам сигнал mr_cl_round_started
+5. При убийстве проверяем кто убил и если это мы, то даем денег
+6. Если мутанты начали кончаться, отправляем mr_sv_respawn																				!!!!ПЛОХОЕ ПОВЕДЕНИЕ - чем больше клиентов, тем больше будет отсылаться сообщений =/
+
+--]]
+
 
 
 class "CMutantsRush"
@@ -11,28 +26,15 @@ function CMutantsRush:__init()
 	self.mutants_at_map = 0
 	self:load_settings()
 	
-	--Небольшой хак - в случае невыделенного сервера у нас 2 луа машины врутятся одновременно
 	
-	--if not mp_db.getEH().listners["mr_sv_prepare"] then
-		mp_db.getEH():callAtEvent("mr_sv_prepare",function (data) mp_mutants_rush.get():sv_prepare_event(data) end)
-		mp_db.getEH():callAtEvent("mr_cl_prepare",function (data) mp_mutants_rush.get():prepareTimer(data) end)
-		mp_db.getEH():callAtEvent("mr_cl_killed",function (data) mp_mutants_rush.get():killed(data) end)
-		mp_db.getEH():callAtEvent("mr_cl_round_started",function (data) mp_mutants_rush.get():cl_round_started() end)
-		mp_db.getEH():callAtEvent("mr_sv_respawn",function (data) mp_mutants_rush.get():respawn(data) end)
-		if level.is_server() then
-			mp_timer.get():add({ms=5*1000,callback = function() mp_mutants_rush.get():sv_prepare_event() end})
-		end
-	--[[else
-		--получается что мы играем на невыделенном сервере
-		cout("client side init")
-		mp_db.getEH():callAtEvent("mr_sv_prepare",function () mp_mutants_rush.get():sv_prepare_event() end)
-		mp_db.getEH():callAtEvent("mr_cl_killed",function (data) mp_mutants_rush.get():killed(data) end)
-		
-		cout("%s",tolog(bind_stalker.get_object()))
-		
-		bind_stalker.get_object().object:set_fastcall(function () mp_db.update() end,bind_stalker.get_object())
-		mp_db.update(function () mp_db.getEH():update() end)
-	end--]]
+	mp_db.getEH():callAtEvent("mr_sv_prepare",function (data) mp_mutants_rush.get():sv_prepare_event(data) end)
+	mp_db.getEH():callAtEvent("mr_cl_prepare",function (data) mp_mutants_rush.get():prepareTimer(data) end)
+	mp_db.getEH():callAtEvent("mr_cl_killed",function (data) mp_mutants_rush.get():killed(data) end)
+	mp_db.getEH():callAtEvent("mr_cl_round_started",function (data) mp_mutants_rush.get():cl_round_started() end)
+	mp_db.getEH():callAtEvent("mr_sv_respawn",function (data) mp_mutants_rush.get():respawn(data) end)
+	if level.is_server() then
+		mp_timer.get():add({ms=5*1000,callback = function() mp_mutants_rush.get():sv_prepare_event() end})
+	end
 
 	self.prepare_counter = self.prepare_time
 
@@ -155,5 +157,4 @@ end
 
 function setup()
 	mp_mutants_rush.get()
-	--mp_db.update(function (obj) mp_mutants_rush.get():update() return false end)
 end
