@@ -141,7 +141,7 @@ void CloseClient()
 
 void __cdecl GetModuleVersion(char* dest,int size)
 {
-	strcpy_s(dest,size,"1.0.0 release");
+	strcpy_s(dest,size,"1.0.2 release");
 }
 
 /*

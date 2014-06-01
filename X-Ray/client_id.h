@@ -4,7 +4,7 @@
 *	S.T.A.L.K.E.R.
 */
 
-class __declspec(dllimport) ClientID
+class  ClientID
 {
 public:
 	unsigned int  id;

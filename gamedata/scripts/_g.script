@@ -397,31 +397,31 @@ function print_table2(table, subs)
 	end
 	for k,v in pairs(table) do
 		if type(v) == "table" then
-			cout(sub.."%s:", tostring(k))
+			cout(sub.."%s:", tolog(k))
 			print_table2(v, sub.."    ")
 		elseif type(v) == "function" then
-			cout(sub.."%s:function", tostring(k))
+			cout(sub.."%s:function", tolog(k))
 		elseif type(v) == "userdata" then
-			cout(sub.."%s:userdata", tostring(k))
+			cout(sub.."%s:userdata", tolog(k))
 		elseif type(v) == "boolean" then
 					if v == true then
 							if(type(k)~="userdata") then
-									cout(sub.."%s:true", tostring(k))
+									cout(sub.."%s:true", tolog(k))
 							else
 									cout(sub.."userdata:true")
 							end
 					else
 							if(type(k)~="userdata") then
-									cout(sub.."%s:false", tostring(k))
+									cout(sub.."%s:false", tolog(k))
 							else
 									cout(sub.."userdata:false")
 							end
 					end
 		else
 			if v ~= nil then
-				cout(sub.."%s:%s", tostring(k),v)
+				cout(sub.."%s:%s", tolog(k),v)
 			else
-				cout(sub.."%s:nil", tostring(k),v)
+				cout(sub.."%s:nil", tolog(k),v)
 			end
 		end
 	end

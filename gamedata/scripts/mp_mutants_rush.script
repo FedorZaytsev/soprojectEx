@@ -8,15 +8,19 @@ class "CMutantsRush"
 function CMutantsRush:__init()
 	cout("CMutantsRush:__init %s",tostring(mp_db.is_admin()))
 	self.ready_to_spawn = false
+	self.mutants_at_map = 0
 	self:load_settings()
 	
 	--Небольшой хак - в случае невыделенного сервера у нас 2 луа машины врутятся одновременно
 	
 	--if not mp_db.getEH().listners["mr_sv_prepare"] then
-		mp_db.getEH():callAtEvent("mr_sv_prepare",function () mp_mutants_rush.get():sv_prepare_event() end)
+		mp_db.getEH():callAtEvent("mr_sv_prepare",function (data) mp_mutants_rush.get():sv_prepare_event(data) end)
+		mp_db.getEH():callAtEvent("mr_cl_prepare",function (data) mp_mutants_rush.get():prepareTimer(data) end)
 		mp_db.getEH():callAtEvent("mr_cl_killed",function (data) mp_mutants_rush.get():killed(data) end)
+		mp_db.getEH():callAtEvent("mr_cl_round_started",function (data) mp_mutants_rush.get():cl_round_started() end)
+		mp_db.getEH():callAtEvent("mr_sv_respawn",function (data) mp_mutants_rush.get():respawn(data) end)
 		if level.is_server() then
-			mp_timer.get():add({ms=5*1000,callback = function() cout("init callback") mp_db.getEH():send("mr_sv_prepare","") end})
+			mp_timer.get():add({ms=5*1000,callback = function() mp_mutants_rush.get():sv_prepare_event() end})
 		end
 	--[[else
 		--получается что мы играем на невыделенном сервере
@@ -41,29 +45,30 @@ function CMutantsRush:load_settings()
 	
 	self.prepare_time = mp_ltx.ltx_read_u32(ltx,fname,"prepare_time")
 	self.time_for_wave = mp_ltx.ltx_read_u32(ltx,fname,"time_for_each_wave")
+	self.min_mutants_at_map = mp_ltx.ltx_read_u32(ltx,fname,"min_mutants_at_map")
 	cout("CMutantsRush:load_settings end")
 end
 
 function CMutantsRush:update()
-	
-end
-
-function CMutantsRush:startWave()
 end
 
 function CMutantsRush:killed(data)
-	cout("CMutantsRush:killed")
+
+	cout("CMutantsRush:killed pure event '%s'",data)
 	local who_name = string.sub(data,0,string.find(data,"#")-1)
 	local victrim_section_name = string.sub(data,string.find(data,"#")+1)
 	cout("killed callback %s %s",who_name,victrim_section_name)
-	cout(level.object_by_id(level.get_local_player_id()):name())
-	if level.object_by_id(level.get_local_player_id()):name()==who_name then
+	
+	local obj = level.object_by_id(level.get_local_player_id())
+	
+	if obj and obj:name() == who_name then
 		local st = get_hud():GetCustomStatic("mp_killed")
 		if not st then
 			get_hud():AddCustomStatic("mp_killed",true)
 			st = get_hud():GetCustomStatic("mp_killed")
 		end
 		st:wnd():TextControl():SetText("You just killed "..victrim_section_name.."")
+		level.add_money_mp(level.get_local_player_id(),100)
 	else
 		local st = get_hud():GetCustomStatic("mp_killed")
 		if not st then
@@ -72,53 +77,70 @@ function CMutantsRush:killed(data)
 		end
 		st:wnd():TextControl():SetText(who_name.." just killed "..victrim_section_name.."")
 	end
-	cout("CMutantsRush:killed end")
-end
-
-function CMutantsRush:sv_prepare_event(msg)
-	cout("sv_prepare f")
-	--if mp_db.is_admin() then
-		cout("prepare_event called")
-		
-		self.prepare_counter = self.prepare_time
-		
-		self:prepareTimer()
-		cout("prepare_event called end")
-	--end
-	cout("sv_prepare f end")
-end
-
-function CMutantsRush:respawn()
-	cout("CMutantsRush:respawn %s",tostring(mp_db.is_admin()))
-	local count = 0 
-	for id,obj in pairs(db.smart_terrain_by_id) do
-		--if obj.respawn_params then
-			--cout("Found good smart to spawn %s 123",obj:name())
-
-			alife():create("boar_normal",obj.position,obj.m_level_vertex_id,obj.m_game_vertex_id)
-			cout("ololo2")
-			count = count + 1
-
-		--end
+	
+	self.mutants_at_map = self.mutants_at_map - 1
+	if self.mutants_at_map < self.min_mutants_at_map then
+		mp_db.getEH():send("mr_sv_respawn","")
 	end
-	cout("spawned %d boars",count)
 end
 
-function CMutantsRush:prepareTimer()
+function CMutantsRush:sv_prepare_event()
+	self.prepare_counter = self.prepare_counter - 1
+	mp_db.getEH():send("mr_cl_prepare",tostring(self.prepare_counter))
+	if self.prepare_counter ~= 0 then
+		mp_timer.get():add({ms=1*1000,callback = function() mp_mutants_rush.get():sv_prepare_event() end})
+	else
+		mp_db.getEH():send("mr_cl_round_started","")
+		self:respawn()
+	end
+end
+
+function CMutantsRush:cl_round_started()
 	if not level.is_server() or not level.is_dedicated() then
+	
 		local st = get_hud():GetCustomStatic("mp_prepare_to_battle")
 		if not st then
 			get_hud():AddCustomStatic("mp_prepare_to_battle",true)
 			st = get_hud():GetCustomStatic("mp_prepare_to_battle")
 		end
-		st:wnd():TextControl():SetText("До старта осталось "..tostring(self.prepare_counter).." c")
+		st:wnd():TextControl():SetText("Round stated!")
 	end
-	self.prepare_counter = self.prepare_counter - 1
-	if self.prepare_counter ~= 0 then
-		mp_timer.get():add({ms=1*1000,callback = function() mp_mutants_rush.get():prepareTimer() end})
-	else
-		self:respawn()
+end
+
+function CMutantsRush:respawn()
+	if not level.is_server() then
+		cout("that is not a server!")
+		return
 	end
+	self.ready_to_spawn = true
+	cout("CMutantsRush:respawn %s",tostring(mp_db.is_admin()))
+	
+	for id,obj in pairs(db.smart_terrain_by_id) do
+		if obj.respawn_params then
+		
+			local count = obj:call_respawn()
+			cout("spawned %d",count)
+			
+			self.mutants_at_map = self.mutants_at_map + count
+
+		end
+	end
+	self.ready_to_spawn = false
+	cout("Now at map %d squards, minimal %d",self.mutants_at_map,self.min_mutants_at_map)
+end
+
+function CMutantsRush:prepareTimer(data)
+	--По идее вызовется только на стороне клиента, надо проверить
+	if not level.is_server() or not level.is_dedicated() then
+	
+		local st = get_hud():GetCustomStatic("mp_prepare_to_battle")
+		if not st then
+			get_hud():AddCustomStatic("mp_prepare_to_battle",true)
+			st = get_hud():GetCustomStatic("mp_prepare_to_battle")
+		end
+		st:wnd():TextControl():SetText(data.." seconds to start")
+	end
+
 end
 
 

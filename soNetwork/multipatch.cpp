@@ -55,22 +55,14 @@ DWORD (_cdecl * F_entity_Create)(char* section);
 DWORD (_cdecl * ai)();
 DWORD (_cdecl * CObjectItemClientServer_CActor_CSE_ALifeCreatureActor___client_object)();
 void (_cdecl * game_cl_GameState__u_EventSend)(NET_Packet &P);
+DWORD (_cdecl * game_cl_GameState__GetPlayerByGameID)(unsigned short id);
+void (_cdecl * game_sv_mp__Player_AddMoney)(DWORD, int);
 unsigned int (_cdecl *game_sv_GameState__count_players)();
 LPCSTR get_event_server();
 LPCSTR get_event_client();
 CSE_Abstract* (_cdecl * game_sv_GameState__get_entity_from_eid)(unsigned short);
+DWORD*	(_cdecl * IPureServer__ID_to_client)		(ClientID ID, bool ScanAll);
 
-#define LUA_GLOBALSINDEX	(-10002)
-#define lua_setglobal(L,s)	lua_setfield(L, LUA_GLOBALSINDEX, (s))
-#define lua_register(L,n,f) (lua_pushcfunction(L, (f)), lua_setglobal(L, (n)))
-#define lua_pushcfunction(L,f)	lua_pushcclosure(L, (f), 0)
-typedef struct lua_State lua_State;
-typedef int (*lua_CFunction) (lua_State *L);
-#define LUA_NUMBER	double
-typedef LUA_NUMBER lua_Number;
-void (_cdecl * lua_pushnumber)(lua_State *L, lua_Number n);
-void (_cdecl * lua_pushcclosure) (lua_State *L, lua_CFunction fn, int n);
-void (_cdecl * lua_setfield) (lua_State *L, int idx, const char *k);
 
 
 DWORD pIPureServer__SendTo;
@@ -140,6 +132,7 @@ char* LevelAlifeSpawnFile = "alife";
 char* LevelScriptFile = "location_main";
 char* LevelDirectory = "$level$";
 char* LevelLocalPlayer = "get_local_player_id";
+char* str_AddMoneyMP = "add_money_mp";
 char* str_ScriptLog = "script_log";
 char* SendDataToServer = "send_data_to_server";
 char* GetEventServer = "get_event_server";
@@ -154,7 +147,8 @@ void game_sv_mp__Create_fix(DWORD pClass,DWORD a2);
 void CLevel__Load_GameSpecific_Before_fix();
 void add_function_to_level();
 void add_function_to_level2();
-void send_data_to_server(LPCSTR data,bool b);
+void send_data_to_server_script(LPCSTR data,bool b);
+void send_data_to_server_engine(NET_Packet *p);
 void script_log(LPCSTR data,bool b);
 unsigned int get_local_player();
 void CControlDirection__update_frame(DWORD pClass);
@@ -168,6 +162,7 @@ DWORD CALifeGraphRegistry__update_fix(DWORD pClass);
 bool Messange_Listner(NET_Packet& p);
 bool is_server();
 bool is_dedicated();
+void add_money_mp(unsigned short id, float money);
 
 
 // patch 1.6.0.0
@@ -306,10 +301,10 @@ void CHook_Patch_02::InstallHooks()
 	F_entity_Create = reinterpret_cast<DWORD (_cdecl *)(char*)>((DWORD)(GameOffset) + 0x3B4AB0);
 	ai = reinterpret_cast<DWORD (_cdecl *)()>((DWORD)(GameOffset) + 0x39A30);
 	
-	lua_pushnumber = reinterpret_cast<void (_cdecl *)(lua_State*, lua_Number)>((DWORD)(LuaOffset) + 0x880);
-	lua_pushcclosure = reinterpret_cast<void (_cdecl *)(lua_State*, lua_CFunction , int)>((DWORD)(LuaOffset) + 0x9D0);
-	lua_setfield = reinterpret_cast<void (_cdecl *)(lua_State*, int , const char *)>((DWORD)(LuaOffset) + 0xD30);
 	game_cl_GameState__u_EventSend = reinterpret_cast<void (_cdecl *)(NET_Packet &)>((DWORD)(GameOffset) + 0x358CB0);
+	game_cl_GameState__GetPlayerByGameID = reinterpret_cast<DWORD (_cdecl *)(unsigned short)>((DWORD)(GameOffset) + 0x358E90);
+	game_sv_mp__Player_AddMoney = reinterpret_cast<void (_cdecl *)(DWORD, int)>((DWORD)(GameOffset) + 0x38ECB0);
+	
 	
 	CObjectItemClientServer_CActor_CSE_ALifeCreatureActor___client_object = reinterpret_cast<unsigned long (_cdecl *)()>((DWORD)(GameOffset) + 0x33E830);
 	pIPureServer__SendTo = ((DWORD)NetServerOffset + 0xAC10);
@@ -491,13 +486,7 @@ void CHook_Patch_02::InstallHooks()
 	Byte((end_of_func + 7),1,0xC3);	// retn
 	Jmp(((DWORD)GameOffset + 0x3B4B1F + 6),end_of_func);
 	// fix CPsyDog::Think (disable CPsyDogAura::update_schedule)
-	Byte(((DWORD)GameOffset + 0x1581F2),5,0x90);
-	// fix CMonsterEnemyMemory::update (disable Sound detection)
-	//Jmp(((DWORD)GameOffset + 0xD36F3),((DWORD)GameOffset + 0xD388A));
-	// fix CBaseMonster::UpdateMemory (disable Sound detection)
-	//Byte(((DWORD)GameOffset + 0xCA7D8),1,0xEB);
-	// fix CScriptGameObject::GetSoundInfo (disable Sound detection)
-	//Jmp(((DWORD)GameOffset + 0x1F0057),((DWORD)GameOffset + 0x1F011C));	
+	Byte(((DWORD)GameOffset + 0x1581F2),5,0x90);	
 	// fix xrServer::Process_event_destroy (crash c_dest == c_from)
 	Byte(((DWORD)GameOffset + 0x437836),1,0xEB);
 	// fix CPHMovementControl::AllocateCharacterObject (create mp_actor with singleplayer physics)
@@ -657,7 +646,7 @@ void CHook_Patch_02::InstallHooks()
 	Byte(((DWORD)add_function_to_lvl1 + 27),1,0x8B);
 	Byte(((DWORD)add_function_to_lvl1 + 28),1,0xC4);
 	Byte(((DWORD)add_function_to_lvl1 + 29),1,0x68);
-	Address(((DWORD)add_function_to_lvl1 + 30),(DWORD)&send_data_to_server);
+	Address(((DWORD)add_function_to_lvl1 + 30),(DWORD)&send_data_to_server_script);
 	Byte(((DWORD)add_function_to_lvl1 + 34),1,0x68);
 	Address(((DWORD)add_function_to_lvl1 + 35),(DWORD)SendDataToServer);
 	Byte(((DWORD)add_function_to_lvl1 + 39),1,0x50);
@@ -716,9 +705,19 @@ void CHook_Patch_02::InstallHooks()
 	Address(((DWORD)add_function_to_lvl1 + 135),(DWORD)str_ScriptLog);
 	Byte(((DWORD)add_function_to_lvl1 + 139),1,0x50);
 	Call(((DWORD)add_function_to_lvl1 + 140),(DWORD)GameOffset + 0x2416C7);
+	
+	Byte(((DWORD)add_function_to_lvl1 + 145),2,0x59);
+	Byte(((DWORD)add_function_to_lvl1 + 147),1,0x8B);
+	Byte(((DWORD)add_function_to_lvl1 + 148),1,0xC4);
+	Byte(((DWORD)add_function_to_lvl1 + 149),1,0x68);
+	Address(((DWORD)add_function_to_lvl1 + 150),(DWORD)&add_money_mp);
+	Byte(((DWORD)add_function_to_lvl1 + 154),1,0x68);
+	Address(((DWORD)add_function_to_lvl1 + 155),(DWORD)str_AddMoneyMP);
+	Byte(((DWORD)add_function_to_lvl1 + 159),1,0x50);
+	Call(((DWORD)add_function_to_lvl1 + 160),(DWORD)GameOffset + 0x2422DD);
 
 	//
-	Jmp(((DWORD)add_function_to_lvl1 + 145),(DWORD) GameOffset + 0x24A71F + 5);
+	Jmp(((DWORD)add_function_to_lvl1 + 165),(DWORD) GameOffset + 0x24A71F + 5);
 
 
 	Jmp(((DWORD)GameOffset + 0x24A71F),(DWORD) add_function_to_lvl1);
@@ -772,8 +771,13 @@ void CHook_Patch_02::InstallHooks()
 	Byte(((DWORD)add_function_to_lvl2 + 33),1,0xC8);
 	Byte(((DWORD)add_function_to_lvl2 + 34),1,0xFF);
 	Byte(((DWORD)add_function_to_lvl2 + 35),1,0xD6);
+	
+	Byte(((DWORD)add_function_to_lvl2 + 36),1,0x8B);
+	Byte(((DWORD)add_function_to_lvl2 + 37),1,0xC8);
+	Byte(((DWORD)add_function_to_lvl2 + 38),1,0xFF);
+	Byte(((DWORD)add_function_to_lvl2 + 39),1,0xD6);
 
-	Jmp(((DWORD)add_function_to_lvl2 + 36),(DWORD)GameOffset + 0x24A762 + 5);
+	Jmp(((DWORD)add_function_to_lvl2 + 40),(DWORD)GameOffset + 0x24A762 + 5);
 
 	Jmp(((DWORD)GameOffset + 0x24A762),(DWORD) add_function_to_lvl2);
 	Byte(((DWORD)GameOffset + 0x24A762 + 5),3,0x90);
@@ -836,25 +840,8 @@ void CHook_Patch_02::InstallHooks()
 
 
 	
-
-
-
-
-
-
-
-	/*
-	Address(((DWORD)GameOffset + 0x24A64D),(DWORD)&get_local_player);
-	Address(((DWORD)GameOffset + 0x24A652),(DWORD)LevelLocalPlayer);
-	*/
-
-
-	// allow pda
-	//Byte(((DWORD)GameOffset + 0x44263E),6,0x90);
 	
 	// correct classes ftables
-	// CControlDirection::update_frame
-	//JoinInClassFtable(((DWORD)GameOffset + 0x51D950),(DWORD)&CControlDirection__update_frame,0x0);
 	// CAI_Bloodsucker
 	// CAI_Bloodsucker::NET_Export
 	JoinInClassFtable((CAI_Bloodsucker__ftable + 0x38),(DWORD)&CAI_Bloodsucker__NET_Export,0x4);
@@ -873,11 +860,6 @@ void CHook_Patch_02::InstallHooks()
 	Address((CAI_Boar__ftable + 0xFC),pCActor__NeedToDestroyObject);
 	// CAI_Boar::TimePassedAfterDeath
 	Address((CAI_Boar__ftable + 0x290),pCActor__TimePassedAfterDeath);
-	// CAI_Crow
-	// CAI_Crow::NET_Export
-	//JoinInClassFtable((CAI_Crow__ftable + 0x38),(DWORD)&CAI_Crow__NET_Export,0x4);
-	// CAI_Crow::NET_Import
-	//JoinInClassFtable((CAI_Crow__ftable + 0x3C),(DWORD)&CAI_Crow__NET_Import,0x4);
 	// CAI_Dog
 	// CAI_Dog::NET_Export
 	JoinInClassFtable((CAI_Dog__ftable + 0x38),(DWORD)&CAI_Dog__NET_Export,0x4);
@@ -905,15 +887,6 @@ void CHook_Patch_02::InstallHooks()
 	Address((CAI_PseudoDog__ftable + 0xFC),pCActor__NeedToDestroyObject);
 	// CAI_PseudoDog::TimePassedAfterDeath
 	Address((CAI_PseudoDog__ftable + 0x290),pCActor__TimePassedAfterDeath);
-	// CAI_Rat
-	// CAI_Rat::NET_Export
-	JoinInClassFtable((CAI_Rat__ftable + 0x38),(DWORD)&CAI_Rat__NET_Export,0x4);
-	// CAI_Rat::NET_Import
-	JoinInClassFtable((CAI_Rat__ftable + 0x3C),(DWORD)&CAI_Rat__NET_Import,0x4);
-	// CAI_Rat::NeedToDestroyObject
-	Address((CAI_Rat__ftable + 0xFC),pCActor__NeedToDestroyObject);
-	// CAI_Rat::TimePassedAfterDeath
-	Address((CAI_Rat__ftable + 0x290),pCActor__TimePassedAfterDeath);
 	// CAI_Stalker
 	// CAI_Stalker::NET_Export
 	JoinInClassFtable((CAI_Stalker__ftable + 0x38),(DWORD)&CAI_Stalker__NET_Export,0x4);
@@ -923,15 +896,6 @@ void CHook_Patch_02::InstallHooks()
 	Address((CAI_Stalker__ftable + 0xFC),pCActor__NeedToDestroyObject);
 	// CAI_Stalker::TimePassedAfterDeath
 	Address((CAI_Stalker__ftable + 0x290),pCActor__TimePassedAfterDeath);
-	// CAI_Trader
-	// CAI_Trader::NET_Export
-	JoinInClassFtable((CAI_Trader__ftable + 0x38),(DWORD)&CAI_Trader__NET_Export,0x4);
-	// CAI_Trader::NET_Import
-	JoinInClassFtable((CAI_Trader__ftable + 0x3C),(DWORD)&CAI_Trader__NET_Import,0x4);
-	// CAI_Trader::NeedToDestroyObject
-	Address((CAI_Trader__ftable + 0xFC),pCActor__NeedToDestroyObject);
-	// CAI_Trader::TimePassedAfterDeath
-	Address((CAI_Trader__ftable + 0x290),pCActor__TimePassedAfterDeath);
 	// CBurer
 	// CBurer::NET_Export
 	JoinInClassFtable((CBurer__ftable + 0x38),(DWORD)&CBurer__NET_Export,0x4);
@@ -941,15 +905,6 @@ void CHook_Patch_02::InstallHooks()
 	Address((CBurer__ftable + 0xFC),pCActor__NeedToDestroyObject);
 	// CBurer::TimePassedAfterDeath
 	Address((CBurer__ftable + 0x290),pCActor__TimePassedAfterDeath);
-	// CCat
-	// CCat::NET_Export
-	JoinInClassFtable((CCat__ftable + 0x38),(DWORD)&CCat__NET_Export,0x4);
-	// CCat::NET_Import
-	JoinInClassFtable((CCat__ftable + 0x3C),(DWORD)&CCat__NET_Import,0x4);
-	// CCat::NeedToDestroyObject
-	Address((CCat__ftable + 0xFC),pCActor__NeedToDestroyObject);
-	// CCat::TimePassedAfterDeath
-	Address((CCat__ftable + 0x290),pCActor__TimePassedAfterDeath);
 	// CChimera
 	// CChimera::NET_Export
 	JoinInClassFtable((CChimera__ftable + 0x38),(DWORD)&CChimera__NET_Export,0x4);
@@ -968,15 +923,6 @@ void CHook_Patch_02::InstallHooks()
 	Address((CController__ftable + 0xFC),pCActor__NeedToDestroyObject);
 	// CController::TimePassedAfterDeath
 	Address((CController__ftable + 0x290),pCActor__TimePassedAfterDeath);
-	// CFracture
-	// CFracture::NET_Export
-	JoinInClassFtable((CFracture__ftable + 0x38),(DWORD)&CFracture__NET_Export,0x4);
-	// CFracture::NET_Import
-	JoinInClassFtable((CFracture__ftable + 0x3C),(DWORD)&CFracture__NET_Import,0x4);
-	// CFracture::NeedToDestroyObject
-	Address((CFracture__ftable + 0xFC),pCActor__NeedToDestroyObject);
-	// CFracture::TimePassedAfterDeath
-	Address((CFracture__ftable + 0x290),pCActor__TimePassedAfterDeath);
 	// CPhantom
 	// CPhantom::NET_Export
 	JoinInClassFtable((CPhantom__ftable + 0x38),(DWORD)&CPhantom__NET_Export,0x4);
@@ -1042,28 +988,11 @@ void CHook_Patch_02::InstallHooks()
 	Address((CTushkano__ftable + 0xFC),pCActor__NeedToDestroyObject);
 	// CTushkano::TimePassedAfterDeath
 	Address((CTushkano__ftable + 0x290),pCActor__TimePassedAfterDeath);
-	// CZombie
-	// CZombie::NET_Export
-	JoinInClassFtable((CZombie__ftable + 0x38),(DWORD)&CZombie__NET_Export,0x4);
-	// CZombie::NET_Import
-	JoinInClassFtable((CZombie__ftable + 0x3C),(DWORD)&CZombie__NET_Import,0x4);
-	// CZombie::NeedToDestroyObject
-	Address((CZombie__ftable + 0xFC),pCActor__NeedToDestroyObject);
-	// CZombie::TimePassedAfterDeath
-	Address((CZombie__ftable + 0x290),pCActor__TimePassedAfterDeath);
 	// CWrapper
-	// CWrapperAbstractMonster<class CSE_ALifeCreatureCrow>::UPDATE_Write
-	//JoinInClassFtable(((DWORD)GameOffset + 0x596DE8),(DWORD)&CSE_ALifeCreatureCrow__UPDATE_Write,0x4);
-	// CWrapperAbstractMonster<class CSE_ALifeCreatureCrow>::UPDATE_Read
-	//JoinInClassFtable(((DWORD)GameOffset + 0x596DEC),(DWORD)&CSE_ALifeCreatureCrow__UPDATE_Read,0x4);
 	// CWrapperAbstractMonster<class CSE_ALifeCreaturePhantom>::UPDATE_Write
 	JoinInClassFtable(((DWORD)GameOffset + 0x597A48),(DWORD)&CSE_ALifeCreaturePhantom__UPDATE_Write,0x4);
 	// CWrapperAbstractMonster<class CSE_ALifeCreaturePhantom>::UPDATE_Read
 	JoinInClassFtable(((DWORD)GameOffset + 0x597A4C),(DWORD)&CSE_ALifeCreaturePhantom__UPDATE_Read,0x4);
-	// CWrapperAbstractMonster<class CSE_ALifeCreatureRat>::UPDATE_Write
-	JoinInClassFtable(((DWORD)GameOffset + 0x5953D8),(DWORD)&CSE_ALifeCreatureRat__UPDATE_Write,0x4);
-	// CWrapperAbstractMonster<class CSE_ALifeCreatureRat>::UPDATE_Read
-	JoinInClassFtable(((DWORD)GameOffset + 0x5953DC),(DWORD)&CSE_ALifeCreatureRat__UPDATE_Read,0x4);
 	// CWrapperAbstractMonster<class CSE_ALifeHumanStalker>::UPDATE_Write
 	JoinInClassFtable(((DWORD)GameOffset + 0x5973B0),(DWORD)&CSE_ALifeHumanStalker__UPDATE_Write,0x4);
 	// CWrapperAbstractMonster<class CSE_ALifeHumanStalker>::UPDATE_Read
@@ -1074,26 +1003,16 @@ void CHook_Patch_02::InstallHooks()
 	// CWrapperAbstractMonster<class CSE_ALifeMonsterBase>::UPDATE_Read
 	JoinInClassFtable(((DWORD)GameOffset + 0x5971B4),(DWORD)&CSE_ALifeMonsterBase__UPDATE_Read,0x4);
 
-	// CWrapperAbstractMonster<class CSE_ALifeTrader>::UPDATE_Write
-	JoinInClassFtable(((DWORD)GameOffset + 0x59674C),(DWORD)&CSE_ALifeTrader__UPDATE_Write,0x4);
-	// CWrapperAbstractMonster<class CSE_ALifeTrader>::UPDATE_Read
-	JoinInClassFtable(((DWORD)GameOffset + 0x596750),(DWORD)&CSE_ALifeTrader__UPDATE_Read,0x4);
 	// CWrapperAbstractMonster<class CSE_ALifePsyDogPhantom>::UPDATE_Write
 	JoinInClassFtable(((DWORD)GameOffset + 0x598480),(DWORD)&CSE_ALifePsyDogPhantom__UPDATE_Write,0x4);
 	// CWrapperAbstractMonster<class CSE_ALifePsyDogPhantom>::UPDATE_Read
 	JoinInClassFtable(((DWORD)GameOffset + 0x598484),(DWORD)&CSE_ALifePsyDogPhantom__UPDATE_Read,0x4);
-	// CWrapperAbstractMonster<class CSE_ALifeCreatureCrow>::NeedUpdate (call CSE_ALifeCreatureAbstract::alive)
-	Address(((DWORD)GameOffset + 0x596E3C),((DWORD)GameOffset + 0xB1F50));
 	// CWrapperAbstractMonster<class CSE_ALifeCreaturePhantom>::NeedUpdate (call CSE_ALifeCreatureAbstract::alive)
 	Address(((DWORD)GameOffset + 0x597A9C),((DWORD)GameOffset + 0xB1F50));
-	// CWrapperAbstractMonster<class CSE_ALifeCreatureRat>::NeedUpdate (call CSE_ALifeCreatureAbstract::alive)
-	Address(((DWORD)GameOffset + 0x59542C),((DWORD)GameOffset + 0xB1F50));
 	// CWrapperAbstractMonster<class CSE_ALifeHumanStalker>::NeedUpdate (call CSE_ALifeCreatureAbstract::alive)
 	Address(((DWORD)GameOffset + 0x597404),((DWORD)GameOffset + 0xB1F50));
 	// CWrapperAbstractMonster<class CSE_ALifeMonsterBase>::NeedUpdate (call CSE_ALifeCreatureAbstract::alive)
 	Address(((DWORD)GameOffset + 0x597204),((DWORD)GameOffset + 0xB1F50));
-	// CWrapperAbstractMonster<class CSE_ALifeTrader>::NeedUpdate (call CSE_ALifeCreatureAbstract::alive)
-	Address(((DWORD)GameOffset + 0x59679C),((DWORD)GameOffset + 0xB1F50));
 	// CWrapperAbstractMonster<class CSE_ALifePsyDogPhantom>::NeedUpdate (call CSE_ALifeCreatureAbstract::alive)
 	Address(((DWORD)GameOffset + 0x5984D4),((DWORD)GameOffset + 0xB1F50));
 	// CWrapperAbstractMonster<class CSE_ALifeCreatureActor>::NeedUpdate (call nullsub (return 0))
@@ -1103,56 +1022,36 @@ void CHook_Patch_02::InstallHooks()
 	Address(((DWORD)GameOffset + 0x54C818),((DWORD)GameOffset + 0x27F550));
 	// CActor::UpdateCL
 	JoinInClassFtable(((DWORD)GameOffset + 0x54C880),(DWORD)&CActor__UpdateCL,0x0);
-	// CActor::cam_Set
-	//Address(((DWORD)GameOffset + 0x54CAEC),((DWORD)GameOffset + 0x3EF59));
 
-	//Jmp(((DWORD)GameOffset + 0xC7BF3),((DWORD)GameOffset + 0xC7C39));
-	//Jmp(((DWORD)GameOffset + 0xC7C46),((DWORD)GameOffset + 0xC7C58));
-	
-
-
-	/*
 	// Render hooks
 	switch(RenderVersion)
 	{
-	case 1:
+		case 1:
 		{
 			// CKinematicsAnimated::PlayCycle
 			JoinInClassFtableEx(((DWORD)RenderOffset + 0x9807C + 0x74),(DWORD)&CKinematicsAnimated__PlayCycle,0x14,pCKinematicsAnimated__PlayCycle);
-			// CKinematicsAnimated::PlayCycle_Ex
-			JoinInClassFtableEx(((DWORD)RenderOffset + 0x9807C + 0x70),(DWORD)&CKinematicsAnimated__PlayCycleEx,0x18,pCKinematicsAnimated__PlayCycleEx);
-			JoinInClassFtable(((DWORD)RenderOffset + 0x9807C + 0x48),(DWORD)&CKinematicsAnimated__PlayCycleEx,0x18);
 			break;
 		}
-	case 2:
+		case 2:
 		{
 			// CKinematicsAnimated::PlayCycle
 			JoinInClassFtableEx(((DWORD)RenderOffset + 0xBE7E4 + 0x74),(DWORD)&CKinematicsAnimated__PlayCycle,0x14,pCKinematicsAnimated__PlayCycle);
-			// CKinematicsAnimated::PlayCycle_Ex
-			JoinInClassFtableEx(((DWORD)RenderOffset + 0xBE7E4 + 0x70),(DWORD)&CKinematicsAnimated__PlayCycleEx,0x18,pCKinematicsAnimated__PlayCycleEx);
-			JoinInClassFtable(((DWORD)RenderOffset + 0xBE7E4 + 0x48),(DWORD)&CKinematicsAnimated__PlayCycleEx,0x18);
 			break;
 		}
-	case 3:
+		case 3:
 		{
 			// CKinematicsAnimated::PlayCycle
 			JoinInClassFtableEx(((DWORD)RenderOffset + 0xD9C34 + 0x74),(DWORD)&CKinematicsAnimated__PlayCycle,0x14,pCKinematicsAnimated__PlayCycle);
-			// CKinematicsAnimated::PlayCycle_Ex
-			JoinInClassFtableEx(((DWORD)RenderOffset + 0xD9C34 + 0x70),(DWORD)&CKinematicsAnimated__PlayCycleEx,0x18,pCKinematicsAnimated__PlayCycleEx);
-			JoinInClassFtable(((DWORD)RenderOffset + 0xD9C34 + 0x48),(DWORD)&CKinematicsAnimated__PlayCycleEx,0x18);
 			break;
 		}
-	case 4:
+		case 4:
 		{
 			// CKinematicsAnimated::PlayCycle
 			JoinInClassFtableEx(((DWORD)RenderOffset + 0xE6244 + 0x74),(DWORD)&CKinematicsAnimated__PlayCycle,0x14,pCKinematicsAnimated__PlayCycle);
-			// CKinematicsAnimated::PlayCycle_Ex
-			JoinInClassFtableEx(((DWORD)RenderOffset + 0xE6244 + 0x70),(DWORD)&CKinematicsAnimated__PlayCycleEx,0x18,pCKinematicsAnimated__PlayCycleEx);
-			JoinInClassFtable(((DWORD)RenderOffset + 0xE6244 + 0x48),(DWORD)&CKinematicsAnimated__PlayCycleEx,0x18);
 			break;
 		}
 	}
-	*/
+
 	// correct switch tables
 	// CLevel::ClientReceive
 	// create MotionsLoc
@@ -1314,21 +1213,6 @@ bool CHook_Patch_02::IsDedicated() {
 
 	return *((bool*) (GetProcAddress(GetModuleHandle(L"xrEngine.exe"),"?g_dedicated_server@@3_NA")));
 }
-/*
-bool Messange_Listner(NET_Packet& p) {
-	//LogHandle->Write("Messanges_listener");
-	//LogHandle->Write("%p",&p);
-	unsigned short type;
-	p.r_begin(type);
-	if (type==M_SOPROJECT_MESSANGE) {
-		char temp[128];
-		p.r_stringZ(temp);
-		HookHandle->MessangeRecieved((temp));
-		return true;
-	}
-	return false;
-	//LogHandle->Write("type %d",type);
-}*/
 
 //good way to create C function without prolog and epilog
 __declspec(naked) void messange_listner_asm(){ 
@@ -1383,7 +1267,7 @@ LPCSTR get_event_server() {
 	LogHandle->Write("2");
 	DWORD xrServerHandle = *(DWORD*)(CLevel + 0x48730);
 	LogHandle->Write("3");
-	DWORD game_sv_GameState = *(DWORD*)(xrServerHandle + 0x98E14);
+	DWORD game_cl_GameState = *(DWORD*)(xrServerHandle + 0x98E14);			//????
 	LogHandle->Write("4");
 	LogHandle->Write("3.5 %d",(unsigned int)(*((DWORD*)(game_sv_GameState + 0x10))));
 	LogHandle->Write("4");
@@ -1422,37 +1306,89 @@ LPCSTR get_event_server() {
 
 }
 
-static int add_function_to_level(lua_State* lua)
-{
-	lua_pushnumber(lua,1);
-	return 1;
-}
 
 unsigned int get_local_player() {
 	return g_pGameLevel->pCurrentEntity->ID();
 }
 
-void send_data_to_server(LPCSTR data,bool b) {
+
+unsigned int get_local_client_id() {
+	DWORD CLevel = (DWORD)g_pGameLevel;
+	DWORD game_cl_GameState = *(DWORD*)(CLevel+0x486F8);
+
+	DWORD cl_id = *(DWORD*)(game_cl_GameState+0xBC);
+
+	Msg("client_id %x",cl_id);
+	return cl_id;
+}
+
+void add_money_mp(unsigned short ident, float money_f) {
+	int money = (int)money_f;
+	Msg("1 %d %d",ident,money);
+
 	if (HookHandle->IsServer()) {
-		Msg("send_data_to_server '%s' from server to client",data);
+		ClientID cl_id;
+		cl_id.set(get_local_client_id());
+		HookHandle->Add_money_mp(cl_id);
+	} else {
 		NET_Packet pack;
 		pack.write_start();
-		pack.w_begin(0x34);		// 0x33 [51] - MotionsSync
+		pack.w_begin(0x32);		
+		pack.w_u8(e_so_engine_packet);
+		pack.w_u8(e_add_money);
+
+		ClientID cl_id;
+		cl_id.set(get_local_client_id());
+		pack.w_clientID(cl_id);
+
+		send_data_to_server_engine(&pack);
+	}
+
+	
+	return;
+}
+
+void send_data_to_server_script(LPCSTR data,bool b) {
+	if (HookHandle->IsServer()) {
+		Msg("send_data_to_server_script '%s' from server to client",data);
+		NET_Packet pack;
+		pack.write_start();
+		pack.w_begin(0x34);		
+		pack.w_u8(e_so_script_packet);
 		pack.w_stringZ(data);
 	
 		HookHandle->SendPacketToAll(pack);
 	} else {
-		Msg("send_data_to_server '%s' from client to server",data);
+		Msg("send_data_to_server_script '%s' from client to server",data);
 		
 		DWORD CLevel = (DWORD)g_pGameLevel;
-		DWORD game_cl_GameState = (DWORD)((DWORD*)CLevel + 0x486F8);
+		DWORD game_cl_GameState = (DWORD)(*(DWORD*)CLevel + 0x486F8);
 		NET_Packet P;
 		P.write_start();
 		P.w_begin(0x32);
+		P.w_u8(e_so_script_packet);
 		P.w_stringZ(data);
 		DWORD pointer = (DWORD)&P;
 		_asm {
 			push pointer
+			mov ecx, game_cl_GameState
+			call game_cl_GameState__u_EventSend
+		}
+	}
+}
+
+void send_data_to_server_engine(NET_Packet *P) {
+	if (HookHandle->IsServer()) {
+		Msg("send_data_to_server_engine from server to client");
+	
+		HookHandle->SendPacketToAll(*P);
+	} else {
+		Msg("send_data_to_server_engine from client to server");
+		
+		DWORD CLevel = (DWORD)g_pGameLevel;
+		DWORD game_cl_GameState = (DWORD)(*(DWORD*)CLevel + 0x486F8);
+		_asm {
+			push P
 			mov ecx, game_cl_GameState
 			call game_cl_GameState__u_EventSend
 		}
@@ -1540,6 +1476,41 @@ void CHook_Patch_02::PlayCycleEx(DWORD pClass,DWORD unk,DWORD MotionID)
 		mov ecx, pCKinematicsAnimated
 		call pCKinematicsAnimated__PlayCycleEx
 	};
+}
+
+void CHook_Patch_02::Add_money_mp(ClientID cl_id) {
+	IPureServer* pPureServer = (IPureServer*)*(DWORD*)((DWORD)g_pGameLevel + 0x48730);
+	IPureServer__ID_to_client = reinterpret_cast<DWORD* (_cdecl *)(ClientID,bool)>(GetProcAddress(GetModuleHandle(L"xrNetServer.dll"),"?ID_to_client@IPureServer@@IAEPAVIClient@@VClientID@@_N@Z"));
+
+
+	DWORD pIClient = 0x0;
+	_asm {
+		mov ecx, pPureServer
+		push 0
+		push cl_id
+		call IPureServer__ID_to_client
+		mov pIClient, eax
+	}
+
+	Msg("pIClient %p",pIClient);
+	DWORD player_state = *(DWORD*)(pIClient + 0x8178);
+	Msg("%p Name %s",player_state,*(DWORD*)(player_state+0x72) + 0x10);
+
+	//DWORD xrServerHandle = *(DWORD*)((DWORD)g_pGameLevel + 0x48730);
+	//DWORD game_sv_GameState = *(DWORD*)(xrServerHandle + 0x98E14);
+	DWORD game_sv_mp__Player_AddMoney = ((DWORD)GameOffset + 0x38ECB0);
+	
+	_asm {
+		mov ecx, g_pGameLevel
+		mov edx, [ecx]
+		mov eax, [edx+48730h]
+		mov ecx, [eax+98E14h]
+
+		push 100
+		push player_state
+		call game_sv_mp__Player_AddMoney
+	}
+
 }
 
 void CHook_Patch_02::SendPacketToAll(NET_Packet& pack)
@@ -1643,7 +1614,6 @@ void CHook_Patch_02::LoadAImap()
 
 void CHook_Patch_02::LoadMapScript()
 {
-	LogHandle->Write("LoadMapScript");
 	char path[520];
 	char* _path = path;
 	DWORD pCScriptStorage = *(DWORD*)(ai() + 0x1C);
@@ -1661,10 +1631,6 @@ void CHook_Patch_02::LoadMapScript()
 		
 	}
 	else LogHandle->Write("level script (%s) not exist",_path);
-
-	//not working:(((((
-	//DWORD lua_machine = *(DWORD *)(pCScriptStorage + 0x4);
-	//lua_register((lua_State*)lua_machine,"test_lua_f",add_function_to_level);
 }
 
 // Other functions
@@ -1714,21 +1680,6 @@ void CLevel__Load_GameSpecific_Before_fix()
 	POP_REG(ecx)
 }
 
-void CControlDirection__update_frame(DWORD pClass)
-{
-	PUSH_REG(ecx)
-	
-	if(HookHandle->IsServer())
-	{
-		_asm
-		{
-			mov ecx, pClass
-			call pCControlDirection__update_frame
-		};
-	}
-
-	POP_REG(ecx)
-}
 
 DWORD F_entity_Create_fix(DWORD pClass)
 {
@@ -1874,7 +1825,7 @@ void CHook_Patch_02_Client::InstallHooks() {
 	Byte(((DWORD)add_function_to_lvl1 + 27),1,0x8B);
 	Byte(((DWORD)add_function_to_lvl1 + 28),1,0xC4);
 	Byte(((DWORD)add_function_to_lvl1 + 29),1,0x68);
-	Address(((DWORD)add_function_to_lvl1 + 30),(DWORD)&send_data_to_server);
+	Address(((DWORD)add_function_to_lvl1 + 30),(DWORD)&send_data_to_server_script);
 	Byte(((DWORD)add_function_to_lvl1 + 34),1,0x68);
 	Address(((DWORD)add_function_to_lvl1 + 35),(DWORD)SendDataToServer);
 	Byte(((DWORD)add_function_to_lvl1 + 39),1,0x50);
@@ -1935,7 +1886,18 @@ void CHook_Patch_02_Client::InstallHooks() {
 	Call(((DWORD)add_function_to_lvl1 + 140),(DWORD)GameOffset + 0x2416C7);
 
 	//
-	Jmp(((DWORD)add_function_to_lvl1 + 145),(DWORD) GameOffset + 0x24A71F + 5);
+	Byte(((DWORD)add_function_to_lvl1 + 145),2,0x59);
+	Byte(((DWORD)add_function_to_lvl1 + 147),1,0x8B);
+	Byte(((DWORD)add_function_to_lvl1 + 148),1,0xC4);
+	Byte(((DWORD)add_function_to_lvl1 + 149),1,0x68);
+	Address(((DWORD)add_function_to_lvl1 + 150),(DWORD)&add_money_mp);
+	Byte(((DWORD)add_function_to_lvl1 + 154),1,0x68);
+	Address(((DWORD)add_function_to_lvl1 + 155),(DWORD)str_AddMoneyMP);
+	Byte(((DWORD)add_function_to_lvl1 + 159),1,0x50);
+	Call(((DWORD)add_function_to_lvl1 + 160),(DWORD)GameOffset + 0x2422DD);
+
+	//
+	Jmp(((DWORD)add_function_to_lvl1 + 165),(DWORD) GameOffset + 0x24A71F + 5);
 
 
 	Jmp(((DWORD)GameOffset + 0x24A71F),(DWORD) add_function_to_lvl1);
@@ -1989,8 +1951,13 @@ void CHook_Patch_02_Client::InstallHooks() {
 	Byte(((DWORD)add_function_to_lvl2 + 33),1,0xC8);
 	Byte(((DWORD)add_function_to_lvl2 + 34),1,0xFF);
 	Byte(((DWORD)add_function_to_lvl2 + 35),1,0xD6);
+	
+	Byte(((DWORD)add_function_to_lvl2 + 36),1,0x8B);
+	Byte(((DWORD)add_function_to_lvl2 + 37),1,0xC8);
+	Byte(((DWORD)add_function_to_lvl2 + 38),1,0xFF);
+	Byte(((DWORD)add_function_to_lvl2 + 39),1,0xD6);
 
-	Jmp(((DWORD)add_function_to_lvl2 + 36),(DWORD)GameOffset + 0x24A762 + 5);
+	Jmp(((DWORD)add_function_to_lvl2 + 40),(DWORD)GameOffset + 0x24A762 + 5);
 
 	Jmp(((DWORD)GameOffset + 0x24A762),(DWORD) add_function_to_lvl2);
 	Byte(((DWORD)GameOffset + 0x24A762 + 5),3,0x90);

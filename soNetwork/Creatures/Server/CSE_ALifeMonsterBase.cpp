@@ -18,7 +18,8 @@
 struct CSE_ALifeMonsterBase_sync_buffer
 {
 	FLOAT   position[3];
-	DWORD	animation;
+	FLOAT	direction[3];
+	BYTE	animation;
 	FLOAT	heading;
 };
 
@@ -52,7 +53,8 @@ void CSE_ALifeMonsterBase__UPDATE_Write(DWORD pClass,NET_Packet* pack)
 
 	// pack data
 	pack->w(&sync_buffer->position,0xC);
-	pack->w(&sync_buffer->animation,0x4);
+	pack->w(&sync_buffer->direction,0xC);
+	pack->w(&sync_buffer->animation,0x1);
 	pack->w(&sync_buffer->heading,0x4);
 
 #ifdef CSE_ALIFE_MONSTER_BASE_DEBUG
@@ -61,6 +63,7 @@ void CSE_ALifeMonsterBase__UPDATE_Write(DWORD pClass,NET_Packet* pack)
 	LogHandle->Write("{");
 	
 	for(int i = 0;i < 3;i++) LogHandle->Write("position[%d] = %f",i,sync_buffer->position[i]);
+	for(int i = 0;i < 3;i++) LogHandle->Write("direction[%d] = %f",i,sync_buffer->direction[i]);
 	LogHandle->Write("animation = %d",sync_buffer->animation);
 	LogHandle->Write("heading = %f",sync_buffer->heading);
 
@@ -100,7 +103,8 @@ void CSE_ALifeMonsterBase__UPDATE_Read(DWORD pClass,NET_Packet* pack)
 
 	// unpack data
 	pack->r(&sync_buffer->position,0xC);
-	pack->r(&sync_buffer->animation,0x4);
+	pack->r(&sync_buffer->direction,0xC);
+	pack->r(&sync_buffer->animation,0x1);
 	pack->r(&sync_buffer->heading,0x4);
 	
 #ifdef CSE_ALIFE_MONSTER_BASE_DEBUG
@@ -109,6 +113,7 @@ void CSE_ALifeMonsterBase__UPDATE_Read(DWORD pClass,NET_Packet* pack)
 	LogHandle->Write("{");
 	
 	for(int i = 0;i < 3;i++) LogHandle->Write("position[%d] = %f",i,sync_buffer->position[i]);
+	for(int i = 0;i < 3;i++) LogHandle->Write("direction[%d] = %f",i,sync_buffer->direction[i]);
 	LogHandle->Write("animation = %d",sync_buffer->animation);
 	LogHandle->Write("heading = %f",sync_buffer->heading);
 

@@ -7,6 +7,7 @@
 #pragma once
 
 #include "utils.h"
+#include "client_id.h"
 
 class __declspec(dllimport) NET_Packet
 {
@@ -42,7 +43,7 @@ public:
 
 	void w_matrix(_matrix<float> & value);
 
-	void w_clientID(void * value);
+	void w_clientID(ClientID & value);
 	void w_chunk_open8(unsigned int & value);
 	void w_chunk_close8(unsigned int value);
 	void w_chunk_open16(unsigned int & value);
@@ -72,7 +73,7 @@ public:
 	void r_sdir(_vector3<float> & value);
 	void r_stringZ(char * value);
 	void r_matrix(_matrix<float> & value);
-	void r_clientID(void * value);
+	void r_clientID(ClientID & value);
 	unsigned int r_elapsed(void);
 	void r_advance(unsigned int ofs);
 	void skip_stringZ(void);

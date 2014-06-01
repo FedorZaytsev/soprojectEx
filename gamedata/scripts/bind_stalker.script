@@ -22,10 +22,7 @@ local game_difficulty_by_num = {
 
 local weapon_hide = {}
 local primary_objects_filled = false
-local object_to_update = nil
-function get_object()
-	return object_to_update
-end
+
 ----------------------------------------------------------------------------------------------------------------------
 class "actor_binder" (object_binder)
 ----------------------------------------------------------------------------------------------------------------------
@@ -33,7 +30,7 @@ function actor_binder:__init (obj) super(obj)
 
 	cout("common data server? %s dedicated? %s",tostring(level.is_server()),tostring(level.is_dedicated()))
 	--все апгрейды весят на серверном объекте, т.е. CActor'e
-	object_to_update = self
+	
 	mp_db.setup_update(self)
 
 	mp_db.add_admin(self.object)

@@ -220,52 +220,31 @@ function sim_board:unregister_smart(obj)
 	self.smarts[obj.id] = nil
 end
 
-that_createf = nil
-that_alife = nil
-
-function omgwtf()
-	if not that_createf then
-		cout("omgwtf!?!?!?!?!?!?!?!?!?!?!??!?!?!?!?")
-	end
-	return that_createf
-end
-function omgwtf_alife()
-	if not that_alife then
-		cout("omgwtf!?!?!?!?!?!?!?!?!?!?!??!?!?!?!?that_alife")
-	end
-	return that_alife
-end
-
 --' Создание нового отряда
 function sim_board:create_squad(spawn_smart, sq_id)
 	local squad_id = tostring(sq_id)
-	cout("create squad called123 %s (%f,%f,%f) %d,%d %s %s %d",squad_id,spawn_smart.position.x,spawn_smart.position.y,spawn_smart.position.z,
+	cout("create squad called %s (%f,%f,%f) %d,%d %s %s",squad_id,spawn_smart.position.x,spawn_smart.position.y,spawn_smart.position.z,
 							spawn_smart.m_level_vertex_id,
-							spawn_smart.m_game_vertex_id,tostring(level.is_dedicated()),tostring(level.is_server()),bind_stalker.ident)
+							spawn_smart.m_game_vertex_id,tostring(level.is_dedicated()),tostring(level.is_server()))
 	
 	local squad = alife():create(squad_id,spawn_smart.position,
 							spawn_smart.m_level_vertex_id,
 							spawn_smart.m_game_vertex_id)
-	that_createf = alife().create
-	that_alife = alife()
-	cout("created")
+
 	--local squad = squad_class(self, squad_id, faction_name, settings_id)
 	--squad:init_squad(spawn_smart)
 	printf("Creating squad[%s] in smart[%s]", squad_id, spawn_smart:name())
 	--' Определяем в каком смарте создать новый отряд
 	squad:create_npc(spawn_smart)
-	cout("2")
 	squad:set_squad_relation()
-	cout("3")
 	self:assign_squad_to_smart(squad, spawn_smart.id)
-	cout("4")
 
 	--' Пересчитываем Team, Squad, Group
 	for k in squad:squad_members() do
 		local obj = k.object
 		squad.board:setup_squad_and_group(obj)
 	end
-	cout("5ed")
+	
 	return squad
 end
 --' Удалить отряд
@@ -461,7 +440,7 @@ end
 
 
 function sim_board:get_squad_target(squad)
-	--printf("List of available target for %s", squad.id)
+	--cout("List of available target for %s", squad.id)
 
 	local available_targets = {}
 	local most_priority_task = nil
@@ -474,7 +453,9 @@ function sim_board:get_squad_target(squad)
 		end
 		if curr_prior > 0 then
 			local target_tbl = {prior = curr_prior, target = v}
+			
 			table.insert(available_targets, target_tbl)
+			--cout("%d %d",curr_prior,v.id)
 		end
 	end
 	if #available_targets > 0 then
@@ -483,8 +464,9 @@ function sim_board:get_squad_target(squad)
 		if max_id == 0 then max_id = 1 end
 		most_priority_task = available_targets[math.random(max_id)].target
 	end
-	--print_table(available_targets)
-	--printf("end of List of available target for %s", squad.id)
+	--print_table2(available_targets)
+	--cout("----------")
+	--cout("end of List of available target for %s %d", squad.id,tolog(most_priority_task.id))
 	return most_priority_task or (squad.smart_id and alife():object(squad.smart_id)) or squad
 end
 

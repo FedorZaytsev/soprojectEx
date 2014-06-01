@@ -19,21 +19,21 @@ void ConsoleThread(void*)
 	while(true)
 	{
 		
-			if(GetAsyncKeyState(VK_LSHIFT))
+			if(GetAsyncKeyState(VK_F1))
 			{
 				while(GetAsyncKeyState(VK_LSHIFT)) Sleep(10);
-				LogHandle->Write("try execute console command SendPacketToAll");
+				/*LogHandle->Write("try execute console command SendPacketToAll");
 				NET_Packet pack;
 				pack.write_start();
 				pack.w_begin(0x34);		// 0x33 [51] - MotionsSync
 				pack.w_stringZ("Hi stalker");
 	
-				HookHandle->SendPacketToAll(pack);
+				HookHandle->SendPacketToAll(pack);*/
 			}		
-			if(GetAsyncKeyState(VK_RSHIFT))
+			if(GetAsyncKeyState(VK_F2))
 			{
 				while(GetAsyncKeyState(VK_RSHIFT)) Sleep(10);
-				LogHandle->Write("try execute console command game_cl_GameState__u_EventSend");
+				/*LogHandle->Write("try execute console command game_cl_GameState__u_EventSend");
 
 				game_cl_GameState__u_EventSend1 = reinterpret_cast<void (_cdecl *)(NET_Packet &)>((DWORD)(HookHandle->GameOffset) + 0x358CB0);
 
@@ -48,7 +48,7 @@ void ConsoleThread(void*)
 					push pointer
 					mov ecx, game_cl_GameState
 					call game_cl_GameState__u_EventSend1
-				}
+				}*/
 
 				/*LogHandle->Write("try execute console command ");
 				NET_Packet pack;

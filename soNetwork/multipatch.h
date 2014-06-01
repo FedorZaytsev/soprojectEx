@@ -7,6 +7,13 @@
 #pragma once
 
 #include "../shared/hook.h"
+enum {
+	e_so_script_packet = 0,
+	e_so_engine_packet
+};
+enum {
+	e_add_money = 0
+};
 
 using namespace std;
 
@@ -43,6 +50,7 @@ public:
 	bool IsDedicated();
 	void LoadAImap();
 	void LoadMapScript();
+	void Add_money_mp(ClientID cl_id);
 
 };
 

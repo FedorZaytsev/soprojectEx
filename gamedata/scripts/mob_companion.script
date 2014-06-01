@@ -7,11 +7,13 @@ local default_anim_standing = anim.stand_idle
 class "mob_companion"
 
 function mob_companion:__init(obj, storage)
+	cout("mob_companion")
 	self.object = obj
 	self.st = storage
 end
 
 function mob_companion:reset_scheme()
+	cout("mob_companion:reset_scheme")
 	mob_state_mgr.set_state(self.object, nil, self.st.state)
 	xr_logic.mob_capture(self.object, true)
 	self.assist_point = nil
@@ -19,6 +21,7 @@ function mob_companion:reset_scheme()
 end
 
 function mob_companion:update(delta)
+	cout("mob_companion:update")
 	if not xr_logic.mob_captured(self.object) then
 		self:reset_scheme()
 		return

@@ -1049,7 +1049,6 @@ function se_smart_terrain:update()
 	end
 	-- јпдейт респауна отр€дов симул€ции.
 	if self.respawn_params ~= nil then
-		cout("try?")
 		self:try_respawn()
 	end
 
@@ -1405,20 +1404,21 @@ function se_smart_terrain:call_respawn()
 	cout("se_smart_terrain:call_respawn ")
 	
 	local available_sects = {}
+	local count_spawned = 0
 	
 	for k,v in pairs(self.respawn_params) do
 		if tonumber(xr_logic.pick_section_from_condlist(db.actor, nil,v.num)) > self.already_spawned[k].num then
 			table.insert(available_sects,k)
 		end
 	end
-	cout("middle")
+
 	if #available_sects > 0 then
-		cout("trying to spawn")
 		local sect_to_spawn = available_sects[math.random(1,#available_sects)]
 		local sect_to_spawn_params = self.respawn_params[sect_to_spawn]
 		local squad = sect_to_spawn_params.squads[math.random(1,#sect_to_spawn_params.squads)]
 		cout("creating section %s",tostring(squad))
 		squad = self.board:create_squad(self, squad)
+		count_spawned = count_spawned + squad:npc_count()
 		squad.respawn_point_id = self.id
 		squad.respawn_point_prop_section = sect_to_spawn
 		self.board:enter_smart(squad, self.id)
@@ -1429,10 +1429,10 @@ function se_smart_terrain:call_respawn()
 	end
 	
 	cout("se_smart_terrain:call_respawn  end")
+	return count_spawned
 end
 
 function se_smart_terrain:try_respawn()
-	cout("se_smart_terrain:try_respawn start")
 
 	local curr_time = game.get_game_time()
 	if self.last_respawn_update == nil or curr_time:diffSec(self.last_respawn_update) > RESPAWN_IDLE then
@@ -1441,10 +1441,7 @@ function se_smart_terrain:try_respawn()
 		local squad_count = smart_terrain_squad_count(self.board.smarts[self.id].squads)
 		if self.max_population <= squad_count then printf("%s cannot respawn due to squad_count %s of %s", self:name(), self.max_population, squad_count) return end
 		
-		printf("OLOLOLOLOLO")
 		self:call_respawn()
-		printf("OLOLOLOLOLOEND")
 	end
 	
-	cout("se_smart_terrain:try_respawn end")
 end

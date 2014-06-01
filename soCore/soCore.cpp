@@ -71,6 +71,22 @@ void HookSetup()
 	HookHandle->LinkAddresses();
 }
 
+void test_so() {
+
+
+	
+	void (_cdecl * Msg)(char const *, ...);
+
+
+	Msg = reinterpret_cast<void (_cdecl *)(char const *, ...)>(GetProcAddress(GetModuleHandle(L"xrCore.dll"),"?Msg@@YAXPBDZZ"));
+	DWORD CLevel = (DWORD)g_pGameLevel;
+	DWORD game_cl_GameState = *(DWORD*)(CLevel+0x486F8);
+
+
+
+	Msg("pointer %x",*(DWORD*)(game_cl_GameState+0xBC));
+}
+
 void MainThread(void*)
 {
 	// check dedicated
@@ -83,6 +99,8 @@ void MainThread(void*)
 	// add commands
 	// network game
 	cmd = HookHandle->CreateConsoleCommand("so_load_network_game",LoadNetworkGame);
+	HookHandle->Console->AddCommand(cmd);
+	cmd = HookHandle->CreateConsoleCommand("so",test_so);
 	HookHandle->Console->AddCommand(cmd);
 	// network version
 	cmd = HookHandle->CreateConsoleCommand("so_version_network_game",GetNetworkVersion);

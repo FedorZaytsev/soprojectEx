@@ -17,12 +17,10 @@
 
 struct CSE_ALifeHumanStalker_sync_buffer
 {
-	FLOAT	unknown[3];
-	FLOAT	unknown2[3];
-	FLOAT	direction[3];
-	FLOAT	position[3];
-	FLOAT	rotation[3];
-	FLOAT	HeadOrientation[2];
+	FLOAT   position[3];
+	FLOAT   direction[3];
+	FLOAT	heading;
+	FLOAT	head_orientation[2];
 	WORD	CurrentWeapon;
 };
 
@@ -57,27 +55,21 @@ void CSE_ALifeHumanStalker__UPDATE_Write(DWORD pClass,NET_Packet* pack)
 	CSE_ALifeHumanStalker_sync_buffer* sync_buffer = (CSE_ALifeHumanStalker_sync_buffer*)CustomSyncData_Entity[objectid];
 
 	// pack data
-	pack->w(&sync_buffer->unknown,0xC);
-	pack->w(&sync_buffer->unknown2,0xC);
-	pack->w(&sync_buffer->direction,0xC);
 	pack->w(&sync_buffer->position,0xC);
-	pack->w(&sync_buffer->rotation,0xC);
-	pack->w_float(sync_buffer->HeadOrientation[0]);
-	pack->w_float(sync_buffer->HeadOrientation[1]);
+	pack->w(&sync_buffer->direction,0xC);
+	pack->w(&sync_buffer->heading,0x4);
+	pack->w(&sync_buffer->head_orientation,0x8);
 	pack->w_u16(sync_buffer->CurrentWeapon);
 
 #ifdef CSE_ALIFE_HUMAN_STALKER_DEBUG
 
 	LogHandle->Write("CSE_ALifeHumanStalker::UPDATE_Write(0x%X,0x%X)",pClass,pack);
 	LogHandle->Write("{");
-
-	for(int i = 0;i < 3;i++) LogHandle->Write("unknown[%d] = %f",i,sync_buffer->unknown[i]);
-	for(int i = 0;i < 3;i++) LogHandle->Write("unknown2[%d] = %f",i,sync_buffer->unknown2[i]);
-	for(int i = 0;i < 3;i++) LogHandle->Write("direction[%d] = %f",i,sync_buffer->direction[i]);
+	
 	for(int i = 0;i < 3;i++) LogHandle->Write("position[%d] = %f",i,sync_buffer->position[i]);
-	for(int i = 0;i < 3;i++) LogHandle->Write("rotation[%d] = %f",i,sync_buffer->rotation[i]);
-	LogHandle->Write("HeadOrientation[0] = %f",sync_buffer->HeadOrientation[0]);
-	LogHandle->Write("HeadOrientation[1] = %f",sync_buffer->HeadOrientation[1]);
+	for(int i = 0;i < 3;i++) LogHandle->Write("direction[%d] = %f",i,sync_buffer->direction[i]);
+	LogHandle->Write("heading = %f",sync_buffer->heading);
+	for(int i = 0;i < 2;i++) LogHandle->Write("head_orientation[%d] = %f",i,sync_buffer->head_orientation[i]);
 	LogHandle->Write("CurrentWeapon = %d",sync_buffer->CurrentWeapon);
 
 	LogHandle->Write("}");
@@ -116,13 +108,10 @@ void CSE_ALifeHumanStalker__UPDATE_Read(DWORD pClass,NET_Packet* pack)
 	}
 
 	// pack data
-	pack->r(&sync_buffer->unknown,0xC);
-	pack->r(&sync_buffer->unknown2,0xC);
-	pack->r(&sync_buffer->direction,0xC);
 	pack->r(&sync_buffer->position,0xC);
-	pack->r(&sync_buffer->rotation,0xC);
-	pack->r_float(sync_buffer->HeadOrientation[0]);
-	pack->r_float(sync_buffer->HeadOrientation[1]);
+	pack->r(&sync_buffer->direction,0xC);
+	pack->r(&sync_buffer->heading,0x4);
+	pack->r(&sync_buffer->head_orientation,0x8);
 	pack->r_u16(sync_buffer->CurrentWeapon);
 
 #ifdef CSE_ALIFE_HUMAN_STALKER_DEBUG
@@ -130,13 +119,10 @@ void CSE_ALifeHumanStalker__UPDATE_Read(DWORD pClass,NET_Packet* pack)
 	LogHandle->Write("CSE_ALifeHumanStalker::UPDATE_Read(0x%X,0x%X)",pClass,pack);
 	LogHandle->Write("{");
 	
-	for(int i = 0;i < 3;i++) LogHandle->Write("unknown[%d] = %f",i,sync_buffer->unknown[i]);
-	for(int i = 0;i < 3;i++) LogHandle->Write("unknown2[%d] = %f",i,sync_buffer->unknown2[i]);
-	for(int i = 0;i < 3;i++) LogHandle->Write("direction[%d] = %f",i,sync_buffer->direction[i]);
 	for(int i = 0;i < 3;i++) LogHandle->Write("position[%d] = %f",i,sync_buffer->position[i]);
-	for(int i = 0;i < 3;i++) LogHandle->Write("rotation[%d] = %f",i,sync_buffer->rotation[i]);
-	LogHandle->Write("HeadOrientation[0] = %f",sync_buffer->HeadOrientation[0]);
-	LogHandle->Write("HeadOrientation[1] = %f",sync_buffer->HeadOrientation[1]);
+	for(int i = 0;i < 3;i++) LogHandle->Write("direction[%d] = %f",i,sync_buffer->direction[i]);
+	LogHandle->Write("heading = %f",sync_buffer->heading);
+	for(int i = 0;i < 2;i++) LogHandle->Write("head_orientation[%d] = %f",i,sync_buffer->head_orientation[i]);
 	LogHandle->Write("CurrentWeapon = %d",sync_buffer->CurrentWeapon);
 
 	LogHandle->Write("}");
